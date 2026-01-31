@@ -1,0 +1,4 @@
+CREATE TABLE IF NOT EXISTS tenors(
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    durasi_bulan INT NOT NULL
+);
