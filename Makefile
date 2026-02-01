@@ -1,5 +1,5 @@
 migrations_path=./migrations
-dsn=mysql://root:secret@tcp(localhost:3306)/sikmatek
+dsn="mysql://root:secret@tcp(localhost:3306)/sikmatek"
 
 .PHONY: api/start
 api/start:

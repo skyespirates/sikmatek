@@ -1,0 +1,6 @@
+CREATE TABLE IF NOT EXISTS products(
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nama VARCHAR(255) NOT NULL,
+    kategori ENUM('MOBIL', 'MOTOR', 'WHITE_GOODS'),
+    harga INT NOT NULL
+);

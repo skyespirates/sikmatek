@@ -9,6 +9,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import ProtectedRoute from "./components/ProtectedRoute";
 import PublicRoute from "./components/PublicRoute";
 import EncryptDecrypt from "./pages/EncryptDecrypt";
+import NotFound from "./pages/NotFound";
 
 export const queryClient = new QueryClient();
 
@@ -25,6 +26,7 @@ createRoot(document.getElementById("root")!).render(
             <Route path="login" element={<Login />} />
           </Route>
           <Route path="labs" element={<EncryptDecrypt />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
     </QueryClientProvider>

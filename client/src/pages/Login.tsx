@@ -1,13 +1,20 @@
 import { useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { Login as LoginUser } from "@/services/auth";
+import { getTenors } from "@/services/tenor";
 import { useNavigate } from "react-router";
+import Table from "@/components/Table";
+
 const Login = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const { isSuccess, data } = useQuery({
+    queryKey: ["tenors"],
+    queryFn: getTenors,
+  });
 
   const mutation = useMutation({
     mutationFn: LoginUser,
@@ -31,6 +38,7 @@ const Login = () => {
   }
   return (
     <div className="h-dvh  grid place-items-center">
+      <div>{isSuccess && <Table data={data.tenors} />}</div>
       <div className="p-8 w-96 border-2 rounded-sm shadow-md flex flex-col items-center gap-6">
         <h1 className="text-3xl">Login</h1>
         <form onSubmit={handleSubmit} className="flex flex-col gap-2 w-full">
