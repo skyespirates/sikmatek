@@ -9,22 +9,28 @@ import (
 var jwtKey = []byte("my_secret_key")
 
 type Claims struct {
-	Id    int    `json:"id"`
-	Email string `json:"email"`
+	Id         int    `json:"id"`
+	Email      string `json:"email"`
+	RoleId     int    `json:"role_id"`
+	ConsumerId int    `json:"consumer_id"`
 	jwt.RegisteredClaims
 }
 
 type JwtPayload struct {
-	Id    int
-	Email string
+	Id         int
+	Email      string
+	RoleId     int
+	ConsumerId int
 }
 
 func GenerateToken(payload JwtPayload) string {
 	expirationTime := time.Now().Add(24 * time.Hour) // token valid for 24h
 
 	claims := &Claims{
-		Id:    payload.Id,
-		Email: payload.Email,
+		Id:         payload.Id,
+		Email:      payload.Email,
+		RoleId:     payload.RoleId,
+		ConsumerId: payload.ConsumerId,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(expirationTime),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),

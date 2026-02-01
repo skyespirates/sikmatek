@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"time"
 
 	"github.com/skyespirates/sikmatek/internal/entity"
 	"github.com/skyespirates/sikmatek/internal/repository"
@@ -31,10 +32,18 @@ func (uc *userUsecase) Register(ctx context.Context, payload *entity.RegisterPay
 		return nil, err
 	}
 	payload.Password = string(hashed)
+
+	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
+	defer cancel()
+
 	return uc.repo.Create(ctx, *payload)
 }
 
 func (uc *userUsecase) Login(ctx context.Context, payload *entity.LoginPayload) (string, error) {
+
+	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
+	defer cancel()
+
 	user, err := uc.repo.FindByEmail(ctx, payload.Email)
 	if err != nil {
 		return "", err
@@ -46,8 +55,10 @@ func (uc *userUsecase) Login(ctx context.Context, payload *entity.LoginPayload) 
 	}
 
 	usr := utils.JwtPayload{
-		Id:    user.Id,
-		Email: user.Email,
+		Id:         user.Id,
+		Email:      user.Email,
+		RoleId:     user.RoleId,
+		ConsumerId: user.ConsumerId,
 	}
 
 	token := utils.GenerateToken(usr)

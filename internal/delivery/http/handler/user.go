@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/skyespirates/sikmatek/internal/entity"
+	"github.com/skyespirates/sikmatek/internal/infra/mysql"
 	"github.com/skyespirates/sikmatek/internal/infra/pgsql"
 	"github.com/skyespirates/sikmatek/internal/usecase"
 )
@@ -30,7 +31,7 @@ func (h *userHandler) Register(w http.ResponseWriter, r *http.Request) {
 	u, err := h.uc.Register(r.Context(), &payload)
 	if err != nil {
 		log.Printf("error: %s", err.Error())
-		if errors.Is(err, pgsql.DuplicateErr) {
+		if errors.Is(err, mysql.ErrDuplicate) {
 			http.Error(w, err.Error(), http.StatusConflict)
 		} else {
 			http.Error(w, "internal server error", http.StatusInternalServerError)

@@ -9,14 +9,14 @@ import (
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/skyespirates/sikmatek/internal/delivery/http/handler"
-	"github.com/skyespirates/sikmatek/internal/infra/pgsql"
+	"github.com/skyespirates/sikmatek/internal/infra/mysql"
 	"github.com/skyespirates/sikmatek/internal/usecase"
 )
 
 func (app *application) routes() http.Handler {
 	router := httprouter.New()
 
-	userHandler := handler.NewUserHandler(usecase.NewUserUsecase(pgsql.NewUserRepository(app.db)))
+	userHandler := handler.NewUserHandler(usecase.NewUserUsecase(mysql.NewUserRepository(app.db)))
 
 	router.ServeFiles("/assets/*filepath", http.Dir("client/dist/assets"))
 
@@ -31,7 +31,7 @@ func (app *application) routes() http.Handler {
 	router.HandlerFunc(http.MethodPost, "/v1/consumers", userHandler.Register)
 	router.HandlerFunc(http.MethodPost, "/v1/consumers/upload-ktp", userHandler.Register)
 	router.HandlerFunc(http.MethodPost, "/v1/consumers/upload-selfie", userHandler.Register)
-	router.HandlerFunc(http.MethodPost, "/v1/consumers/:limit_id/sisa-limit", userHandler.Register)
+	router.HandlerFunc(http.MethodPost, "/v1/consumers/limits/:limit_id/sisa-limit", userHandler.Register)
 
 	router.HandlerFunc(http.MethodPost, "/v1/pengajuan-limit", userHandler.Register)
 	router.HandlerFunc(http.MethodPost, "/v1/pengajuan-limit/:id/approve", userHandler.Register)
