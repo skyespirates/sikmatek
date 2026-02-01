@@ -9,7 +9,6 @@ import (
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/skyespirates/sikmatek/internal/delivery/http/handler"
-	"github.com/skyespirates/sikmatek/internal/infra/mysql"
 	"github.com/skyespirates/sikmatek/internal/infra/pgsql"
 	"github.com/skyespirates/sikmatek/internal/usecase"
 )
@@ -18,28 +17,36 @@ func (app *application) routes() http.Handler {
 	router := httprouter.New()
 
 	userHandler := handler.NewUserHandler(usecase.NewUserUsecase(pgsql.NewUserRepository(app.db)))
-	tenorHandler := handler.NewTenorHandler(usecase.NewTenorUsecase(mysql.NewTenorRepository(app.db)))
 
 	router.ServeFiles("/assets/*filepath", http.Dir("client/dist/assets"))
 
 	router.HandlerFunc(http.MethodGet, "/", index)
 	router.HandlerFunc(http.MethodGet, "/healthcheck", healthcheck)
 
+	// auth service
 	router.HandlerFunc(http.MethodPost, "/v1/auth/register", userHandler.Register)
+	router.HandlerFunc(http.MethodPost, "/v1/auth/login", userHandler.Login)
+
+	// consumers service
 	router.HandlerFunc(http.MethodPost, "/v1/consumers", userHandler.Register)
-	router.HandlerFunc(http.MethodGet, "/v1/tenors", tenorHandler.GetList)
-	router.HandlerFunc(http.MethodPost, "/v1/tenors", tenorHandler.CreateTenor)
+	router.HandlerFunc(http.MethodPost, "/v1/consumers/upload-ktp", userHandler.Register)
+	router.HandlerFunc(http.MethodPost, "/v1/consumers/upload-selfie", userHandler.Register)
+	router.HandlerFunc(http.MethodPost, "/v1/consumers/:limit_id/sisa-limit", userHandler.Register)
+
 	router.HandlerFunc(http.MethodPost, "/v1/pengajuan-limit", userHandler.Register)
 	router.HandlerFunc(http.MethodPost, "/v1/pengajuan-limit/:id/approve", userHandler.Register)
 	router.HandlerFunc(http.MethodPost, "/v1/pengajuan-limit/:id/reject", userHandler.Register)
+
+	// product service
 	router.HandlerFunc(http.MethodGet, "/v1/produk", userHandler.Register)
+	router.HandlerFunc(http.MethodPost, "/v1/produk", userHandler.Register)
+
+	// transaction service
 	router.HandlerFunc(http.MethodPost, "/v1/kontrak", userHandler.Register)
 	router.HandlerFunc(http.MethodGet, "/v1/kontrak/:nomor_kontrak", userHandler.Register)
-	router.HandlerFunc(http.MethodGet, "/v1/kontrak/:nomor_kontrak/cicilan", userHandler.Register)
+	router.HandlerFunc(http.MethodPost, "/v1/kontrak/:nomor_kontrak/cicilan", userHandler.Register)
+
 	router.HandlerFunc(http.MethodPost, "/v1/cicilan/:id/bayar", userHandler.Register)
-	router.HandlerFunc(http.MethodPost, "/v1/konsumen/:id/sisa-limit", userHandler.Register)
-	router.HandlerFunc(http.MethodPost, "/v1/credit-limits", userHandler.Register)
-	router.HandlerFunc(http.MethodPost, "/v1/transactions", userHandler.Register)
 	router.HandlerFunc(http.MethodGet, "/v1/transactions", func(w http.ResponseWriter, r *http.Request) {
 		name := r.URL.Query().Get("name")
 

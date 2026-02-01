@@ -4,5 +4,7 @@ CREATE TABLE IF NOT EXISTS credit_limits (
     status ENUM('PENDING', 'APPROVED', 'REJECTED') DEFAULT 'PENDING',
     approved_by INT,
     approved_at TIMESTAMP,
-    CONSTRAINT fk_users FOREIGN KEY (approved_by) REFERENCES users(id)
+    consumer_id INT NOT NULL,
+    CONSTRAINT fk_users FOREIGN KEY (approved_by) REFERENCES users(id),
+    CONSTRAINT fk_consumer FOREIGN KEY (consumer_id) REFERENCES consumers(id)
 );
