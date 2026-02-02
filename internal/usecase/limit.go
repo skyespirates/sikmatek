@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"database/sql"
 	"time"
 
 	"github.com/skyespirates/sikmatek/internal/entity"
@@ -9,30 +10,78 @@ import (
 )
 
 type LimitUsecase interface {
-	AjukanLimit(context.Context, entity.CreateLimitPayload) (*entity.Limit, error)
-	TindakLanjut(context.Context, entity.UpdateLimitPayload) (*entity.Limit, error)
+	AjukanLimit(context.Context, entity.CreateLimitPayload) (int64, error)
+	TindakLanjut(context.Context, entity.UpdateLimitPayload) error
 }
 
 type limitUsecase struct {
+	db   *sql.DB
 	repo repository.LimitRepository
 }
 
-func NewLimitUsecase(repo repository.LimitRepository) LimitUsecase {
+func NewLimitUsecase(db *sql.DB, repo repository.LimitRepository) LimitUsecase {
 	return &limitUsecase{
+		db:   db,
 		repo: repo,
 	}
 }
 
-func (u *limitUsecase) AjukanLimit(ctx context.Context, payload entity.CreateLimitPayload) (*entity.Limit, error) {
+func (uc *limitUsecase) AjukanLimit(ctx context.Context, payload entity.CreateLimitPayload) (int64, error) {
+
 	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
 	defer cancel()
 
-	return u.repo.Create(ctx, payload)
+	tx, err := uc.db.BeginTx(ctx, nil)
+	if err != nil {
+		return 0, err
+	}
+
+	defer func() {
+		if err != nil {
+			tx.Rollback()
+		}
+	}()
+
+	id, err := uc.repo.Create(ctx, tx, payload)
+	if err != nil {
+		return 0, err
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		return 0, err
+	}
+
+	return id, nil
+
 }
 
-func (u *limitUsecase) TindakLanjut(ctx context.Context, payload entity.UpdateLimitPayload) (*entity.Limit, error) {
+func (uc *limitUsecase) TindakLanjut(ctx context.Context, payload entity.UpdateLimitPayload) error {
+
 	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
 	defer cancel()
 
-	return u.repo.Action(ctx, payload)
+	tx, err := uc.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		if err != nil {
+			tx.Rollback()
+		}
+	}()
+
+	err = uc.repo.UpdateStatus(ctx, tx, payload)
+	if err != nil {
+		return err
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		return err
+	}
+
+	return nil
+
 }

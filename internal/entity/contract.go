@@ -12,3 +12,14 @@ type Contract struct {
 	ProductId       int    `json:"product_id"`
 	LimitId         int    `json:"limit_id"`
 }
+
+type CreateContractPayload struct {
+	ConsumerId int    `json:"consumer_id"`
+	ProductId  int    `json:"product_id"`
+	LimitId    int    `json:"limit_id"`
+	Tenor      string `json:"tenor"`
+}
+
+type UpdateContractPayload struct {
+	Status string `json:"status"`
+}

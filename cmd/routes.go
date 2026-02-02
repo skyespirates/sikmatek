@@ -18,8 +18,8 @@ func (app *application) routes() http.Handler {
 
 	userHandler := handler.NewUserHandler(usecase.NewUserUsecase(mysql.NewUserRepository(app.db)))
 	consumerHandler := handler.NewConsumerHandler()
-	limitHandler := handler.NewLimitHandler(usecase.NewLimitUsecase(mysql.NewLimitRepository(app.db)))
-	transactionHandler := handler.NewTransactionHandler()
+	limitHandler := handler.NewLimitHandler(usecase.NewLimitUsecase(app.db, mysql.NewLimitRepository()))
+	contractHandler := handler.NewContractHandler(usecase.NewContractUsecase(mysql.NewContractRepository()))
 
 	router.ServeFiles("/assets/*filepath", http.Dir("client/dist/assets"))
 
@@ -45,10 +45,15 @@ func (app *application) routes() http.Handler {
 	router.HandlerFunc(http.MethodGet, "/v1/produk", userHandler.Register)
 	router.HandlerFunc(http.MethodPost, "/v1/produk", userHandler.Register)
 
-	// transactions service
-	router.HandlerFunc(http.MethodPost, "/v1/kontrak", transactionHandler.BuatKontrak)
-	router.HandlerFunc(http.MethodGet, "/v1/kontrak/:nomor_kontrak", transactionHandler.DetailKontrak)
-	router.HandlerFunc(http.MethodPost, "/v1/kontrak/:nomor_kontrak/cicilan", transactionHandler.CicilanKontrak)
+	// contracts service
+	router.HandlerFunc(http.MethodPost, "/v1/kontrak", contractHandler.BuatKontrak)
+	router.PATCH("/v1/kontrak/:nomor_kontrak/quote", contractHandler.QuoteKontrak)
+	router.PATCH("/v1/kontrak/:nomor_kontrak/confirm", contractHandler.ConfirmKontrak)
+	router.PATCH("/v1/kontrak/:nomor_kontrak/cancel", contractHandler.CancelKontrak)
+	router.PATCH("/v1/kontrak/:nomor_kontrak/activate", contractHandler.ActivateKontrak)
+	router.PATCH("/v1/kontrak/:nomor_kontrak/cicilan", contractHandler.CicilKontrak)
+	router.GET("/v1/kontrak/:nomor_kontrak", contractHandler.DetailKontrak)
+	router.GET("/v1/kontrak/:nomor_kontrak/installments", contractHandler.DaftarCicilan)
 
 	router.HandlerFunc(http.MethodPost, "/v1/cicilan/:id/bayar", userHandler.Register)
 	router.HandlerFunc(http.MethodGet, "/v1/transactions", func(w http.ResponseWriter, r *http.Request) {

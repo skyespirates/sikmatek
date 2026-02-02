@@ -7,6 +7,7 @@ import (
 )
 
 type LimitRepository interface {
-	Create(context.Context, entity.CreateLimitPayload) (*entity.Limit, error)
-	Action(context.Context, entity.UpdateLimitPayload) (*entity.Limit, error)
+	Create(context.Context, QueryExecutor, entity.CreateLimitPayload) (int64, error)
+	UpdateStatus(context.Context, QueryExecutor, entity.UpdateLimitPayload) error
+	GetLimitById(context.Context, QueryExecutor, int) (*entity.Limit, error)
 }

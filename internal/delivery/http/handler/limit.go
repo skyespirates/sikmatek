@@ -2,6 +2,7 @@ package handler
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -30,20 +31,19 @@ func (h *limitHandler) Pengajuan(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	limit, err := h.uc.AjukanLimit(r.Context(), payload)
+	id, err := h.uc.AjukanLimit(r.Context(), payload)
 	if err != nil {
 		log.Printf("error: %s", err.Error())
 		http.Error(w, "internal server error", http.StatusInternalServerError)
 		return
 	}
 
-	resp := map[string]any{}
-	resp["limit"] = limit
+	location := fmt.Sprintf("/v1/limits/%d", id)
 
-	err = json.NewEncoder(w).Encode(resp)
-	if err != nil {
-		http.Error(w, "error on encoding", http.StatusInternalServerError)
-	}
+	w.WriteHeader(http.StatusCreated)
+	w.Header().Set("Location", location)
+
+	fmt.Fprintf(w, `{"id": %d}`, id)
 }
 
 func (h *limitHandler) Approve(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
@@ -60,7 +60,7 @@ func (h *limitHandler) Approve(w http.ResponseWriter, r *http.Request, ps httpro
 	payload.LimitId = limit_id
 	payload.Action = "APPROVED"
 
-	limit, err := h.uc.TindakLanjut(r.Context(), payload)
+	err = h.uc.TindakLanjut(r.Context(), payload)
 	if err != nil {
 		log.Printf("error: %s", err.Error())
 		http.Error(w, "internal server error", http.StatusInternalServerError)
@@ -69,7 +69,6 @@ func (h *limitHandler) Approve(w http.ResponseWriter, r *http.Request, ps httpro
 
 	resp := map[string]any{}
 	resp["message"] = "limit approved"
-	resp["limit"] = limit
 
 	err = json.NewEncoder(w).Encode(resp)
 	if err != nil {
@@ -90,7 +89,7 @@ func (h *limitHandler) Reject(w http.ResponseWriter, r *http.Request, ps httprou
 	payload.LimitId = limit_id
 	payload.Action = "REJECTED"
 
-	limit, err := h.uc.TindakLanjut(r.Context(), payload)
+	err = h.uc.TindakLanjut(r.Context(), payload)
 	if err != nil {
 		log.Printf("error: %s", err.Error())
 		http.Error(w, "internal server error", http.StatusInternalServerError)
@@ -99,7 +98,6 @@ func (h *limitHandler) Reject(w http.ResponseWriter, r *http.Request, ps httprou
 
 	resp := map[string]any{}
 	resp["message"] = "limit rejected'"
-	resp["limit"] = limit
 
 	err = json.NewEncoder(w).Encode(resp)
 	if err != nil {
