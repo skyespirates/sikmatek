@@ -2,6 +2,8 @@ package usecase
 
 import (
 	"context"
+	"database/sql"
+	"log"
 	"time"
 
 	"github.com/skyespirates/sikmatek/internal/entity"
@@ -16,12 +18,16 @@ type UserUsecase interface {
 }
 
 type userUsecase struct {
-	repo repository.UserRepository
+	db *sql.DB
+	ur repository.UserRepository
+	cr repository.ConsumerRepository
 }
 
-func NewUserUsecase(repo repository.UserRepository) *userUsecase {
+func NewUserUsecase(db *sql.DB, ur repository.UserRepository, cr repository.ConsumerRepository) *userUsecase {
 	return &userUsecase{
-		repo: repo,
+		db: db,
+		ur: ur,
+		cr: cr,
 	}
 }
 
@@ -36,7 +42,7 @@ func (uc *userUsecase) Register(ctx context.Context, payload *entity.RegisterPay
 	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
 	defer cancel()
 
-	return uc.repo.Create(ctx, *payload)
+	return uc.ur.Create(ctx, uc.db, *payload)
 }
 
 func (uc *userUsecase) Login(ctx context.Context, payload *entity.LoginPayload) (string, error) {
@@ -44,9 +50,19 @@ func (uc *userUsecase) Login(ctx context.Context, payload *entity.LoginPayload) 
 	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
 	defer cancel()
 
-	user, err := uc.repo.FindByEmail(ctx, payload.Email)
+	user, err := uc.ur.FindByEmail(ctx, uc.db, payload.Email)
 	if err != nil {
 		return "", err
+	}
+	var consumerId int
+	if user.RoleId == utils.Roles["admin"] {
+		consumerId = 0
+	} else {
+		consumerId, err = uc.cr.GetIdByUserId(ctx, uc.db, user.Id)
+		log.Printf("CONSUMER_ID %d", consumerId)
+		if err != nil {
+			return "", err
+		}
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(payload.Password))
@@ -58,10 +74,11 @@ func (uc *userUsecase) Login(ctx context.Context, payload *entity.LoginPayload) 
 		Id:         user.Id,
 		Email:      user.Email,
 		RoleId:     user.RoleId,
-		ConsumerId: user.ConsumerId,
+		ConsumerId: consumerId,
 	}
 
 	token := utils.GenerateToken(usr)
 
 	return token, nil
+
 }

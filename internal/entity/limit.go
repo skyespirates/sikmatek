@@ -19,3 +19,8 @@ type UpdateLimitPayload struct {
 	Action  string `json:"action"`
 	AdminId int    `json:"admin_id"`
 }
+
+type LimitListPayload struct {
+	RoleId     int
+	ConsumerId int
+}

@@ -1,11 +1,18 @@
 package entity
 
 type User struct {
-	Id         int    `json:"id"`
-	Email      string `json:"email"`
-	Password   string `json:"-"`
-	RoleId     int    `json:"role_id"`
-	ConsumerId int    `json:"consumer_id"`
+	Id       int    `json:"id"`
+	Email    string `json:"email"`
+	Password string `json:"-"`
+	RoleId   int    `json:"role_id"`
+}
+
+type UserDetail struct {
+	Id         int
+	Email      string
+	Password   string
+	RoleId     int
+	ConsumerId int
 }
 
 type RegisterPayload struct {

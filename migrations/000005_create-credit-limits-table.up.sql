@@ -5,6 +5,6 @@ CREATE TABLE IF NOT EXISTS credit_limits (
     approved_by INT,
     approved_at TIMESTAMP,
     consumer_id INT NOT NULL,
-    CONSTRAINT fk_users FOREIGN KEY (approved_by) REFERENCES users(id),
+    CONSTRAINT fk_user FOREIGN KEY (approved_by) REFERENCES users(id),
     CONSTRAINT fk_consumer FOREIGN KEY (consumer_id) REFERENCES consumers(id)
 );

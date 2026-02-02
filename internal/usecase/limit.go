@@ -3,13 +3,16 @@ package usecase
 import (
 	"context"
 	"database/sql"
+	"log"
 	"time"
 
 	"github.com/skyespirates/sikmatek/internal/entity"
 	"github.com/skyespirates/sikmatek/internal/repository"
+	"github.com/skyespirates/sikmatek/internal/utils"
 )
 
 type LimitUsecase interface {
+	GetList(context.Context) ([]*entity.Limit, error)
 	AjukanLimit(context.Context, entity.CreateLimitPayload) (int64, error)
 	TindakLanjut(context.Context, entity.UpdateLimitPayload) error
 }
@@ -24,6 +27,26 @@ func NewLimitUsecase(db *sql.DB, repo repository.LimitRepository) LimitUsecase {
 		db:   db,
 		repo: repo,
 	}
+}
+
+func (uc *limitUsecase) GetList(ctx context.Context) ([]*entity.Limit, error) {
+
+	claims := utils.ContextGetUser(ctx)
+
+	log.Printf("CLAIMS %+v", claims)
+
+	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
+	defer cancel()
+
+	payload := entity.LimitListPayload{
+		RoleId:     claims.RoleId,
+		ConsumerId: claims.ConsumerId,
+	}
+
+	log.Printf("PAYLOAD %+v", payload)
+
+	return uc.repo.GetLimitList(ctx, uc.db, payload)
+
 }
 
 func (uc *limitUsecase) AjukanLimit(ctx context.Context, payload entity.CreateLimitPayload) (int64, error) {

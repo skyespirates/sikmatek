@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS contracts (
     jumlah_bunga INT NOT NULL,
     tenor INT CHECK(tenor IN (1, 2, 3, 6)),
     total_pembiayaan INT GENERATED ALWAYS AS (otr+admin_fee+jumlah_bunga) STORED,
-    status ENUM('ACTIVE', 'PAID', 'DEFAULT') DEFAULT 'ACTIVE',
+    status ENUM('DRAFT', 'QUOTED', 'CANCELLED', 'CONFIRMED', 'ACTIVE', 'COMPLETED', 'DEFAULT') DEFAULT 'DRAFT',
     consumer_id INT NOT NULL,
     product_id INT NOT NULL,
     limit_id INT NOT NULL,

@@ -22,6 +22,26 @@ func NewLimitHandler(uc usecase.LimitUsecase) *limitHandler {
 	}
 }
 
+func (h *limitHandler) LimitList(w http.ResponseWriter, r *http.Request) {
+
+	limit, err := h.uc.GetList(r.Context())
+	if err != nil {
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	resp := map[string]any{}
+
+	resp["message"] = "limit list"
+	resp["limit"] = limit
+
+	err = json.NewEncoder(w).Encode(resp)
+	if err != nil {
+		http.Error(w, "error encoding", http.StatusInternalServerError)
+	}
+
+}
+
 func (h *limitHandler) Pengajuan(w http.ResponseWriter, r *http.Request) {
 	var payload entity.CreateLimitPayload
 

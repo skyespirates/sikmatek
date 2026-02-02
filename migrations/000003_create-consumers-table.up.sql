@@ -7,5 +7,7 @@ CREATE TABLE IF NOT EXISTS consumers (
     tanggal_lahir DATE,
     gaji INT,
     foto_ktp VARCHAR(128),
-    foto_selfie VARCHAR(128)
+    foto_selfie VARCHAR(128),
+    user_id INT NOT NULL UNIQUE,
+    CONSTRAINT fk_users FOREIGN KEY (user_id) REFERENCES users(id)
 );

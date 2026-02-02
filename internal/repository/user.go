@@ -7,6 +7,6 @@ import (
 )
 
 type UserRepository interface {
-	Create(context.Context, entity.RegisterPayload) (*entity.User, error)
-	FindByEmail(context.Context, string) (*entity.User, error)
+	Create(context.Context, QueryExecutor, entity.RegisterPayload) (*entity.User, error)
+	FindByEmail(context.Context, QueryExecutor, string) (*entity.User, error)
 }

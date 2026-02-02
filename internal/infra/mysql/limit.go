@@ -6,6 +6,7 @@ import (
 
 	"github.com/skyespirates/sikmatek/internal/entity"
 	"github.com/skyespirates/sikmatek/internal/repository"
+	"github.com/skyespirates/sikmatek/internal/utils"
 )
 
 type limitRepository struct{}
@@ -67,5 +68,41 @@ func (r *limitRepository) GetLimitById(ctx context.Context, exec repository.Quer
 	}
 
 	return &l, nil
+
+}
+
+func (r *limitRepository) GetLimitList(ctx context.Context, exec repository.QueryExecutor, payload entity.LimitListPayload) ([]*entity.Limit, error) {
+
+	// role["admin"] = 1
+	// role["consumer"] = 2
+
+	query := `SELECT id, requested_limit, status, approved_by, approved_at, consumer_id FROM credit_limits `
+	args := []any{}
+
+	if payload.RoleId == utils.Roles["consumer"] {
+		query += `WHERE consumer_id = ?`
+		args = append(args, payload.ConsumerId)
+	}
+
+	rows, err := exec.QueryContext(ctx, query, args...)
+	if err != nil {
+		return nil, err
+	}
+
+	var limits []*entity.Limit
+	for rows.Next() {
+
+		var l entity.Limit
+
+		err = rows.Scan(&l.Id, &l.Requested, &l.Status, &l.ApprovedBy, &l.ApprovedAt, &l.ConsumerId)
+		if err != nil {
+			return nil, err
+		}
+
+		limits = append(limits, &l)
+
+	}
+
+	return limits, nil
 
 }

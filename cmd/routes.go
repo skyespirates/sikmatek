@@ -16,7 +16,7 @@ import (
 func (app *application) routes() http.Handler {
 	router := httprouter.New()
 
-	userHandler := handler.NewUserHandler(usecase.NewUserUsecase(mysql.NewUserRepository(app.db)))
+	userHandler := handler.NewUserHandler(usecase.NewUserUsecase(app.db, mysql.NewUserRepository(app.db), mysql.NewConsumerRepository()))
 	consumerHandler := handler.NewConsumerHandler()
 	limitHandler := handler.NewLimitHandler(usecase.NewLimitUsecase(app.db, mysql.NewLimitRepository()))
 	contractHandler := handler.NewContractHandler(usecase.NewContractUsecase(mysql.NewContractRepository()))
@@ -37,6 +37,7 @@ func (app *application) routes() http.Handler {
 	router.HandlerFunc(http.MethodGet, "/v1/consumers/limits/:limit_id/sisa-limit", consumerHandler.CheckLimit)
 
 	// limits service
+	router.HandlerFunc(http.MethodGet, "/v1/limits", app.authenticate(limitHandler.LimitList))
 	router.HandlerFunc(http.MethodPost, "/v1/pengajuan-limit", limitHandler.Pengajuan)
 	router.PATCH("/v1/pengajuan-limit/:limit_id/approve", limitHandler.Approve)
 	router.PATCH("/v1/pengajuan-limit/:limit_id/reject", limitHandler.Reject)
