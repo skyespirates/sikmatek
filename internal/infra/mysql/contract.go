@@ -54,3 +54,38 @@ func (r *contractRepository) Create(ctx context.Context, exec repository.QueryEx
 func (r *contractRepository) Update(ctx context.Context, exec repository.QueryExecutor, payload entity.UpdateContractPayload) error {
 	return nil
 }
+
+func (r *contractRepository) List(ctx context.Context, exec repository.QueryExecutor, payload entity.ListContractPayload) ([]*entity.Contract, error) {
+
+	var query string
+	args := []any{}
+	if payload.RoleId == utils.Roles["admin"] {
+		query = `SELECT nomor_kontrak, otr, admin_fee, jumlah_bunga, tenor, total_pembiayaan, status, consumer_id, product_id, limit_id FROM contracts`
+	} else {
+		query = `SELECT nomor_kontrak, otr, admin_fee, jumlah_bunga, tenor, total_pembiayaan, status, consumer_id, product_id, limit_id FROM contracts WHERE consumer_id = ?`
+		args = append(args, payload.ConsumerId)
+	}
+
+	rows, err := exec.QueryContext(ctx, query, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var contracts []*entity.Contract
+	for rows.Next() {
+
+		var c entity.Contract
+
+		err = rows.Scan(&c.NomorKontrak, &c.Otr, &c.AdminFee, &c.JumlahBunga, &c.Tenor, &c.TotalPembiayaan, &c.Status, &c.ConsumerId, &c.ProductId, &c.LimitId)
+		if err != nil {
+			return nil, err
+		}
+
+		contracts = append(contracts, &c)
+
+	}
+
+	return contracts, nil
+
+}

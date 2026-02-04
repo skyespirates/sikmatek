@@ -2,7 +2,17 @@
 
 ## Diagram
 
-COMING SOON
+### Use Case
+
+![use case](./docs/use_case.jpg)
+
+### ERD
+
+![erd](./docs/erd.jpg)
+
+### Infra
+
+![infra](./docs/infra.jpg)
 
 ## List of Dependencies
 

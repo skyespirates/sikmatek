@@ -8,7 +8,6 @@ import (
 
 	"github.com/skyespirates/sikmatek/internal/entity"
 	"github.com/skyespirates/sikmatek/internal/infra/mysql"
-	"github.com/skyespirates/sikmatek/internal/infra/pgsql"
 	"github.com/skyespirates/sikmatek/internal/usecase"
 )
 
@@ -21,6 +20,7 @@ func NewUserHandler(uc usecase.UserUsecase) *userHandler {
 }
 
 func (h *userHandler) Register(w http.ResponseWriter, r *http.Request) {
+
 	var payload entity.RegisterPayload
 	err := json.NewDecoder(r.Body).Decode(&payload)
 	if err != nil {
@@ -28,7 +28,7 @@ func (h *userHandler) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	u, err := h.uc.Register(r.Context(), &payload)
+	token, err := h.uc.Register(r.Context(), &payload)
 	if err != nil {
 		log.Printf("error: %s", err.Error())
 		if errors.Is(err, mysql.ErrDuplicate) {
@@ -39,15 +39,21 @@ func (h *userHandler) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	jsonByte, err := json.MarshalIndent(u, "", "  ")
+	resp := map[string]any{}
+	resp["message"] = "user registered successfully"
+	resp["token"] = token
+
+	w.WriteHeader(http.StatusCreated)
+	err = json.NewEncoder(w).Encode(resp)
 	if err != nil {
 		log.Printf("error: %s", err.Error())
 		http.Error(w, "internal server error", http.StatusInternalServerError)
 	}
-	w.Write(jsonByte)
+
 }
 
 func (h *userHandler) Login(w http.ResponseWriter, r *http.Request) {
+
 	defer r.Body.Close()
 
 	var payload entity.LoginPayload
@@ -60,8 +66,8 @@ func (h *userHandler) Login(w http.ResponseWriter, r *http.Request) {
 	token, err := h.uc.Login(r.Context(), &payload)
 	if err != nil {
 		log.Printf("error: %s", err.Error())
-		if errors.Is(err, pgsql.ErrNotFound) {
-			http.Error(w, "invalid email or password", http.StatusUnauthorized)
+		if errors.Is(err, usecase.ErrNotFound) {
+			http.Error(w, err.Error(), http.StatusUnauthorized)
 			return
 		}
 		http.Error(w, "internal server error", http.StatusInternalServerError)
@@ -77,4 +83,5 @@ func (h *userHandler) Login(w http.ResponseWriter, r *http.Request) {
 		log.Printf("error: %s", err.Error())
 		http.Error(w, "something went wrong", http.StatusInternalServerError)
 	}
+
 }

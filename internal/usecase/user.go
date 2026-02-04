@@ -3,6 +3,7 @@ package usecase
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"log"
 	"time"
 
@@ -12,8 +13,10 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+var ErrNotFound = errors.New("incorrect username or password")
+
 type UserUsecase interface {
-	Register(context.Context, *entity.RegisterPayload) (*entity.User, error)
+	Register(context.Context, *entity.RegisterPayload) (string, error)
 	Login(context.Context, *entity.LoginPayload) (string, error)
 }
 
@@ -31,18 +34,51 @@ func NewUserUsecase(db *sql.DB, ur repository.UserRepository, cr repository.Cons
 	}
 }
 
-func (uc *userUsecase) Register(ctx context.Context, payload *entity.RegisterPayload) (*entity.User, error) {
-	// hash the password
-	hashed, err := bcrypt.GenerateFromPassword([]byte(payload.Password), 12)
-	if err != nil {
-		return nil, err
-	}
-	payload.Password = string(hashed)
+func (uc *userUsecase) Register(ctx context.Context, payload *entity.RegisterPayload) (string, error) {
 
 	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
 	defer cancel()
 
-	return uc.ur.Create(ctx, uc.db, *payload)
+	tx, err := uc.db.BeginTx(ctx, nil)
+	defer func() {
+		if err != nil {
+			tx.Rollback()
+		}
+	}()
+
+	// hash the password
+	hashed, err := bcrypt.GenerateFromPassword([]byte(payload.Password), 12)
+	if err != nil {
+		return "", err
+	}
+	payload.Password = string(hashed)
+
+	user, err := uc.ur.Create(ctx, uc.db, *payload)
+	if err != nil {
+		return "", err
+	}
+
+	consumerId, err := uc.cr.Create(ctx, tx, user.Id)
+	if err != nil {
+		return "", err
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		return "", err
+	}
+
+	jwtPayload := utils.JwtPayload{
+		Id:         user.Id,
+		Email:      user.Email,
+		RoleId:     user.RoleId,
+		ConsumerId: consumerId,
+	}
+
+	token := utils.GenerateToken(jwtPayload)
+
+	return token, nil
+
 }
 
 func (uc *userUsecase) Login(ctx context.Context, payload *entity.LoginPayload) (string, error) {
@@ -67,7 +103,7 @@ func (uc *userUsecase) Login(ctx context.Context, payload *entity.LoginPayload) 
 
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(payload.Password))
 	if err != nil {
-		return "", err
+		return "", ErrNotFound
 	}
 
 	usr := utils.JwtPayload{

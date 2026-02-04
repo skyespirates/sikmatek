@@ -23,3 +23,8 @@ type CreateContractPayload struct {
 type UpdateContractPayload struct {
 	Status string `json:"status"`
 }
+
+type ListContractPayload struct {
+	ConsumerId int
+	RoleId     int
+}

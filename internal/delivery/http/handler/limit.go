@@ -43,6 +43,7 @@ func (h *limitHandler) LimitList(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *limitHandler) Pengajuan(w http.ResponseWriter, r *http.Request) {
+
 	var payload entity.CreateLimitPayload
 
 	err := json.NewDecoder(r.Body).Decode(&payload)
@@ -64,11 +65,14 @@ func (h *limitHandler) Pengajuan(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Location", location)
 
 	fmt.Fprintf(w, `{"id": %d}`, id)
+
 }
 
-func (h *limitHandler) Approve(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (h *limitHandler) Approve(w http.ResponseWriter, r *http.Request) {
+
 	var payload entity.UpdateLimitPayload
 
+	ps := httprouter.ParamsFromContext(r.Context())
 	id := ps.ByName("limit_id")
 
 	limit_id, err := strconv.Atoi(id)
@@ -94,9 +98,14 @@ func (h *limitHandler) Approve(w http.ResponseWriter, r *http.Request, ps httpro
 	if err != nil {
 		http.Error(w, "error on encoding", http.StatusInternalServerError)
 	}
+
 }
-func (h *limitHandler) Reject(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+
+func (h *limitHandler) Reject(w http.ResponseWriter, r *http.Request) {
+
 	var payload entity.UpdateLimitPayload
+
+	ps := httprouter.ParamsFromContext(r.Context())
 
 	id := ps.ByName("limit_id")
 
@@ -123,6 +132,7 @@ func (h *limitHandler) Reject(w http.ResponseWriter, r *http.Request, ps httprou
 	if err != nil {
 		http.Error(w, "error on encoding", http.StatusInternalServerError)
 	}
+
 }
 
 func (h *limitHandler) Check(w http.ResponseWriter, r *http.Request) {

@@ -21,7 +21,4 @@ WORKDIR /app
 COPY --from=backend-builder /app/server .
 COPY --from=frontend-builder /client/dist ./client/dist
 
-ENV DSN="root:secret@tcp(db:3306)/sikmatek" \ 
-    PORT=3000
-
 CMD ["./server"]

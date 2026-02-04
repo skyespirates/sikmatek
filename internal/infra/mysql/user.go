@@ -5,25 +5,30 @@ import (
 	"database/sql"
 	"errors"
 
+	msql "github.com/go-sql-driver/mysql"
 	"github.com/skyespirates/sikmatek/internal/entity"
 	"github.com/skyespirates/sikmatek/internal/repository"
 )
 
 var ErrDuplicate = errors.New("email already registered")
 
-type userRepository struct {
-	db *sql.DB
-}
+type userRepository struct{}
 
 func NewUserRepository(db *sql.DB) repository.UserRepository {
 	return &userRepository{}
 }
 
 func (ur *userRepository) Create(ctx context.Context, exec repository.QueryExecutor, user entity.RegisterPayload) (*entity.User, error) {
+
 	query := `INSERT INTO users (email, password) VALUES (?, ?)`
 	args := []any{user.Email, user.Password}
 	result, err := exec.ExecContext(ctx, query, args...)
 	if err != nil {
+
+		if mysqlErr, ok := err.(*msql.MySQLError); ok && mysqlErr.Number == 1062 {
+			return nil, ErrDuplicate
+		}
+
 		return nil, err
 	}
 
@@ -40,6 +45,7 @@ func (ur *userRepository) Create(ctx context.Context, exec repository.QueryExecu
 	}
 
 	return &u, nil
+
 }
 
 func (ur *userRepository) FindByEmail(ctx context.Context, exec repository.QueryExecutor, email string) (*entity.User, error) {
