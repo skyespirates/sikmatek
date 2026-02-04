@@ -12,4 +12,5 @@ type ContractRepository interface {
 	List(context.Context, QueryExecutor, entity.ListContractPayload) ([]*entity.Contract, error)
 	Quote(context.Context, QueryExecutor, entity.QuoteContractPayload) error
 	GetByNomorKontrak(context.Context, QueryExecutor, string) (*entity.Contract, error)
+	ConsumerAction(context.Context, QueryExecutor, entity.ConsumerActionPayload) error
 }

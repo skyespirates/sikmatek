@@ -13,6 +13,7 @@ type Claims struct {
 	Email      string `json:"email"`
 	RoleId     int    `json:"role_id"`
 	ConsumerId int    `json:"consumer_id"`
+	IsVerified bool   `json:"is_verified"`
 	jwt.RegisteredClaims
 }
 
@@ -21,6 +22,7 @@ type JwtPayload struct {
 	Email      string
 	RoleId     int
 	ConsumerId int
+	IsVerified bool
 }
 
 func GenerateToken(payload JwtPayload) string {
@@ -31,6 +33,7 @@ func GenerateToken(payload JwtPayload) string {
 		Email:      payload.Email,
 		RoleId:     payload.RoleId,
 		ConsumerId: payload.ConsumerId,
+		IsVerified: payload.IsVerified,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(expirationTime),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),

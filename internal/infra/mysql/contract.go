@@ -104,3 +104,26 @@ func (r *contractRepository) GetByNomorKontrak(ctx context.Context, exec reposit
 	return &contract, nil
 
 }
+
+func (r *contractRepository) ConsumerAction(ctx context.Context, exec repository.QueryExecutor, payload entity.ConsumerActionPayload) error {
+
+	query := `UPDATE contracts SET status = ? WHERE nomor_kontrak = ?`
+	args := []any{payload.Action, payload.NomorKontrak}
+
+	result, err := exec.ExecContext(ctx, query, args...)
+	if err != nil {
+		return err
+	}
+
+	affected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if affected == 0 {
+		return errors.New("failed to perform consumer action")
+	}
+
+	return nil
+
+}

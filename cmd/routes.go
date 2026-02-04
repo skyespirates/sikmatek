@@ -9,6 +9,7 @@ import (
 	"github.com/skyespirates/sikmatek/internal/delivery/http/handler"
 	"github.com/skyespirates/sikmatek/internal/infra/mysql"
 	"github.com/skyespirates/sikmatek/internal/usecase"
+	"github.com/skyespirates/sikmatek/internal/utils"
 )
 
 func (app *application) routes() http.Handler {
@@ -47,32 +48,32 @@ func (app *application) routes() http.Handler {
 	router.HandlerFunc(http.MethodPost, "/v1/auth/login", userHandler.Login)
 
 	// consumers service
-	router.HandlerFunc(http.MethodPut, "/v1/consumers", app.authenticate(consumerHandler.CompleteConsumerInfo))
-	router.HandlerFunc(http.MethodPut, "/v1/consumers/upload-ktp", app.authenticate(consumerHandler.UploadKtp))
-	router.HandlerFunc(http.MethodPut, "/v1/consumers/upload-selfie", app.authenticate(consumerHandler.UploadSelfie))
-	router.HandlerFunc(http.MethodPatch, "/v1/consumers/:consumer_id/verify", app.authenticate(consumerHandler.VerifyConsumer))
+	router.HandlerFunc(http.MethodPut, "/v1/consumers", app.authenticate(app.authorize(utils.Roles["consumer"])(consumerHandler.CompleteConsumerInfo)))
+	router.HandlerFunc(http.MethodPut, "/v1/consumers/upload-ktp", app.authenticate(app.authorize(utils.Roles["consumer"])(consumerHandler.UploadKtp)))
+	router.HandlerFunc(http.MethodPut, "/v1/consumers/upload-selfie", app.authenticate(app.authorize(utils.Roles["consumer"])(consumerHandler.UploadSelfie)))
+	router.HandlerFunc(http.MethodPatch, "/v1/consumers/:consumer_id/verify", app.authenticate(app.authorize(utils.Roles["admin"])(consumerHandler.VerifyConsumer)))
 	router.HandlerFunc(http.MethodGet, "/v1/consumers/limits/:limit_id/sisa-limit", consumerHandler.CheckLimit)
 
 	// limits service
-	router.HandlerFunc(http.MethodGet, "/v1/limits", app.authenticate(limitHandler.LimitList))
-	router.HandlerFunc(http.MethodPost, "/v1/pengajuan-limit", app.authenticate(limitHandler.Pengajuan))
-	router.HandlerFunc(http.MethodPatch, "/v1/pengajuan-limit/:limit_id/approve", limitHandler.Approve)
-	router.HandlerFunc(http.MethodPatch, "/v1/pengajuan-limit/:limit_id/reject", limitHandler.Reject)
+	router.HandlerFunc(http.MethodGet, "/v1/limits", app.authenticate(app.authorize(utils.Roles["admin"], utils.Roles["consumer"])(limitHandler.LimitList)))
+	router.HandlerFunc(http.MethodPost, "/v1/pengajuan-limit", app.authenticate(app.authorize(utils.Roles["consumer"])(limitHandler.Pengajuan)))
+	router.HandlerFunc(http.MethodPatch, "/v1/pengajuan-limit/:limit_id/approve", app.authenticate(app.authorize(utils.Roles["admin"])(limitHandler.Approve)))
+	router.HandlerFunc(http.MethodPatch, "/v1/pengajuan-limit/:limit_id/reject", app.authenticate(app.authorize(utils.Roles["admin"])(limitHandler.Reject)))
 
 	// products service
 	router.HandlerFunc(http.MethodGet, "/v1/products", productHandler.List)
-	router.HandlerFunc(http.MethodPost, "/v1/products", productHandler.Create)
+	router.HandlerFunc(http.MethodPost, "/v1/products", app.authenticate(app.authorize(utils.Roles["admin"])(productHandler.Create)))
 
 	// contracts service
-	router.HandlerFunc(http.MethodPost, "/v1/kontrak", app.authenticate(contractHandler.BuatKontrak))
+	router.HandlerFunc(http.MethodPost, "/v1/kontrak", app.authenticate(app.authorize(utils.Roles["consumer"])(contractHandler.BuatKontrak)))
 	router.HandlerFunc(http.MethodGet, "/v1/kontrak", app.authenticate(contractHandler.ListKontrak))
-	router.HandlerFunc(http.MethodPatch, "/v1/kontrak/:nomor_kontrak/quote", contractHandler.QuoteKontrak)
-	router.HandlerFunc(http.MethodPatch, "/v1/kontrak/:nomor_kontrak/confirm", contractHandler.ConfirmKontrak)
-	router.HandlerFunc(http.MethodPatch, "/v1/kontrak/:nomor_kontrak/cancel", contractHandler.CancelKontrak)
-	router.HandlerFunc(http.MethodPatch, "/v1/kontrak/:nomor_kontrak/activate", contractHandler.ActivateKontrak)
-	router.HandlerFunc(http.MethodPatch, "/v1/kontrak/:nomor_kontrak/cicilan", contractHandler.CicilKontrak)
-	router.HandlerFunc(http.MethodGet, "/v1/kontrak/:nomor_kontrak", contractHandler.DetailKontrak)
-	router.HandlerFunc(http.MethodGet, "/v1/kontrak/:nomor_kontrak/installments", contractHandler.DaftarCicilan)
+	router.HandlerFunc(http.MethodPatch, "/v1/kontrak/:nomor_kontrak/quote", app.authenticate(app.authorize(utils.Roles["admin"])(contractHandler.QuoteKontrak)))
+	router.HandlerFunc(http.MethodPatch, "/v1/kontrak/:nomor_kontrak/confirm", app.authenticate(app.authorize(utils.Roles["consumer"])(contractHandler.ConfirmKontrak)))
+	router.HandlerFunc(http.MethodPatch, "/v1/kontrak/:nomor_kontrak/cancel", app.authenticate(app.authorize(utils.Roles["consumer"])(contractHandler.CancelKontrak)))
+	router.HandlerFunc(http.MethodPatch, "/v1/kontrak/:nomor_kontrak/activate", app.authenticate(app.authorize(utils.Roles["admin"])(contractHandler.ActivateKontrak)))
+	router.HandlerFunc(http.MethodPatch, "/v1/kontrak/:nomor_kontrak/cicilan", app.authenticate(app.authorize(utils.Roles["consumer"])(contractHandler.CicilKontrak)))
+	router.HandlerFunc(http.MethodGet, "/v1/kontrak/:nomor_kontrak", app.authenticate(contractHandler.DetailKontrak))
+	router.HandlerFunc(http.MethodGet, "/v1/kontrak/:nomor_kontrak/installments", app.authenticate(contractHandler.DaftarCicilan))
 
 	router.HandlerFunc(http.MethodPost, "/v1/cicilan/:id/bayar", userHandler.Register)
 	router.HandlerFunc(http.MethodGet, "/v1/transactions", func(w http.ResponseWriter, r *http.Request) {

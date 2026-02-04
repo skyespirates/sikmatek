@@ -24,3 +24,8 @@ type UpdateConsumerPayload struct {
 	TanggalLahir string `json:"tanggal_lahir"`
 	Gaji         int    `json:"gaji"`
 }
+
+type ConsumerActionPayload struct {
+	NomorKontrak string
+	Action       string
+}

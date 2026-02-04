@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"net/http"
+	"slices"
 	"strings"
 
 	"github.com/skyespirates/sikmatek/internal/utils"
@@ -76,4 +77,25 @@ func (app *application) corsMiddleware(next http.Handler) http.Handler {
 
 		next.ServeHTTP(w, r)
 	})
+}
+
+func (app *application) authorize(allowedRoles ...int) func(http.HandlerFunc) http.HandlerFunc {
+
+	return func(next http.HandlerFunc) http.HandlerFunc {
+		return func(w http.ResponseWriter, r *http.Request) {
+			claim := utils.ContextGetUser(r.Context()) // retrieve claims from context
+			if claim == nil {
+				http.Error(w, "unauthorized", http.StatusUnauthorized)
+				return
+			}
+
+			if slices.Contains(allowedRoles, claim.RoleId) {
+				next.ServeHTTP(w, r)
+				return
+			}
+
+			http.Error(w, "forbidden", http.StatusForbidden)
+		}
+	}
+
 }

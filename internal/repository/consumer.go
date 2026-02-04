@@ -15,4 +15,5 @@ type ConsumerRepository interface {
 	SetKtpPath(context.Context, QueryExecutor, int, string) error
 	SetSelfiePath(context.Context, QueryExecutor, int, string) error
 	Verify(context.Context, QueryExecutor, int) error
+	GetIsVerifiedById(context.Context, QueryExecutor, int) (bool, error)
 }

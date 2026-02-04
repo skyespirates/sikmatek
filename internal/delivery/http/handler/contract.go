@@ -33,8 +33,7 @@ func (h *contractHandler) BuatKontrak(w http.ResponseWriter, r *http.Request) {
 
 	nomor_kontrak, err := h.uc.Create(r.Context(), payload)
 	if err != nil {
-		log.Printf("error: %s", err.Error())
-		http.Error(w, "internal server error", http.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -62,18 +61,51 @@ func (h *contractHandler) QuoteKontrak(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *contractHandler) ConfirmKontrak(w http.ResponseWriter, r *http.Request) {
+
+	ps := httprouter.ParamsFromContext(r.Context())
+	nomor_kontrak := ps.ByName("nomor_kontrak")
+
+	err := h.uc.Confirm(r.Context(), nomor_kontrak)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	fmt.Fprintf(w, "contract %s has confirmed", nomor_kontrak)
 	w.WriteHeader(http.StatusNoContent)
-	w.Write([]byte("konsumen menyetujui kontrak"))
+
 }
 
 func (h *contractHandler) CancelKontrak(w http.ResponseWriter, r *http.Request) {
+
+	ps := httprouter.ParamsFromContext(r.Context())
+	nomor_kontrak := ps.ByName("nomor_kontrak")
+
+	err := h.uc.Confirm(r.Context(), nomor_kontrak)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	fmt.Fprintf(w, "contract %s has cancelled", nomor_kontrak)
 	w.WriteHeader(http.StatusNoContent)
-	w.Write([]byte("konsument membatalkan kontrak"))
+
 }
 
 func (h *contractHandler) ActivateKontrak(w http.ResponseWriter, r *http.Request) {
+
+	ps := httprouter.ParamsFromContext(r.Context())
+	nomor_kontrak := ps.ByName("nomor_kontrak")
+
+	err := h.uc.Confirm(r.Context(), nomor_kontrak)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	fmt.Fprintf(w, "contract %s has activated", nomor_kontrak)
 	w.WriteHeader(http.StatusNoContent)
-	w.Write([]byte("admin mengativasi kontrak"))
+
 }
 
 func (h *contractHandler) CicilKontrak(w http.ResponseWriter, r *http.Request) {

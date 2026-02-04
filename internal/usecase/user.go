@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"log"
 	"time"
 
 	"github.com/skyespirates/sikmatek/internal/entity"
@@ -63,6 +62,11 @@ func (uc *userUsecase) Register(ctx context.Context, payload *entity.RegisterPay
 		return "", err
 	}
 
+	isVerified, err := uc.cr.GetIsVerifiedById(ctx, tx, consumerId)
+	if err != nil {
+		return "", err
+	}
+
 	err = tx.Commit()
 	if err != nil {
 		return "", err
@@ -73,6 +77,7 @@ func (uc *userUsecase) Register(ctx context.Context, payload *entity.RegisterPay
 		Email:      user.Email,
 		RoleId:     user.RoleId,
 		ConsumerId: consumerId,
+		IsVerified: isVerified,
 	}
 
 	token := utils.GenerateToken(jwtPayload)
@@ -90,12 +95,18 @@ func (uc *userUsecase) Login(ctx context.Context, payload *entity.LoginPayload) 
 	if err != nil {
 		return "", err
 	}
+
 	var consumerId int
+	var isVerified bool
 	if user.RoleId == utils.Roles["admin"] {
 		consumerId = 0
+		isVerified = false
 	} else {
 		consumerId, err = uc.cr.GetIdByUserId(ctx, uc.db, user.Id)
-		log.Printf("CONSUMER_ID %d", consumerId)
+		if err != nil {
+			return "", err
+		}
+		isVerified, err = uc.cr.GetIsVerifiedById(ctx, uc.db, consumerId)
 		if err != nil {
 			return "", err
 		}
@@ -111,6 +122,7 @@ func (uc *userUsecase) Login(ctx context.Context, payload *entity.LoginPayload) 
 		Email:      user.Email,
 		RoleId:     user.RoleId,
 		ConsumerId: consumerId,
+		IsVerified: isVerified,
 	}
 
 	token := utils.GenerateToken(usr)

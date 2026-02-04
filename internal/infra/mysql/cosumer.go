@@ -157,3 +157,17 @@ func (r *consumerRepository) Verify(ctx context.Context, exec repository.QueryEx
 	return nil
 
 }
+
+func (r *consumerRepository) GetIsVerifiedById(ctx context.Context, exec repository.QueryExecutor, consumerID int) (bool, error) {
+
+	var isVerified int
+
+	query := `SELECT is_verified FROM consumers WHERE id = ?`
+	err := exec.QueryRowContext(ctx, query, consumerID).Scan(&isVerified)
+	if err != nil {
+		return false, err
+	}
+
+	return isVerified == 1, nil
+
+}
