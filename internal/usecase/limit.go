@@ -3,7 +3,6 @@ package usecase
 import (
 	"context"
 	"database/sql"
-	"log"
 	"time"
 
 	"github.com/skyespirates/sikmatek/internal/entity"
@@ -33,8 +32,6 @@ func (uc *limitUsecase) GetList(ctx context.Context) ([]*entity.Limit, error) {
 
 	claims := utils.ContextGetUser(ctx)
 
-	log.Printf("CLAIMS %+v", claims)
-
 	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
 	defer cancel()
 
@@ -42,8 +39,6 @@ func (uc *limitUsecase) GetList(ctx context.Context) ([]*entity.Limit, error) {
 		RoleId:     claims.RoleId,
 		ConsumerId: claims.ConsumerId,
 	}
-
-	log.Printf("PAYLOAD %+v", payload)
 
 	return uc.repo.GetLimitList(ctx, uc.db, payload)
 
@@ -53,6 +48,9 @@ func (uc *limitUsecase) AjukanLimit(ctx context.Context, payload entity.CreateLi
 
 	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
 	defer cancel()
+
+	claims := utils.ContextGetUser(ctx)
+	payload.ConsumerId = claims.ConsumerId
 
 	tx, err := uc.db.BeginTx(ctx, nil)
 	if err != nil {

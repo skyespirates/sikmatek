@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/julienschmidt/httprouter"
 	"github.com/skyespirates/sikmatek/internal/entity"
 	"github.com/skyespirates/sikmatek/internal/usecase"
 )
@@ -25,6 +26,7 @@ func (h *contractHandler) BuatKontrak(w http.ResponseWriter, r *http.Request) {
 
 	err := json.NewDecoder(r.Body).Decode(&payload)
 	if err != nil {
+		log.Println(err.Error())
 		http.Error(w, "bad request", http.StatusBadRequest)
 		return
 	}
@@ -46,7 +48,17 @@ func (h *contractHandler) ListKontrak(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *contractHandler) QuoteKontrak(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusNoContent)
+
+	ps := httprouter.ParamsFromContext(r.Context())
+	nomor_kontrak := ps.ByName("nomor_kontrak")
+	err := h.uc.GenerateQuote(r.Context(), nomor_kontrak)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	fmt.Fprintf(w, "contract %s has quoted", nomor_kontrak)
+
 }
 
 func (h *contractHandler) ConfirmKontrak(w http.ResponseWriter, r *http.Request) {

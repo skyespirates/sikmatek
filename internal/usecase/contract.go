@@ -2,14 +2,18 @@ package usecase
 
 import (
 	"context"
+	"database/sql"
+	"errors"
+	"time"
 
 	"github.com/skyespirates/sikmatek/internal/entity"
 	"github.com/skyespirates/sikmatek/internal/repository"
+	"github.com/skyespirates/sikmatek/internal/utils"
 )
 
 type ContractUsecase interface {
 	Create(context.Context, entity.CreateContractPayload) (string, error)
-	Quote(context.Context) error
+	GenerateQuote(context.Context, string) error
 	Confirm(context.Context) error
 	Cancel(context.Context) error
 	Activate(context.Context) error
@@ -19,22 +23,114 @@ type ContractUsecase interface {
 }
 
 type contractUsecase struct {
-	repo repository.ContractRepository
+	db *sql.DB
+	cr repository.ContractRepository
+	lr repository.LimitRepository
+	pr repository.ProductRepository
 }
 
-func NewContractUsecase(repo repository.ContractRepository) ContractUsecase {
+func NewContractUsecase(db *sql.DB, cr repository.ContractRepository, lr repository.LimitRepository, pr repository.ProductRepository) ContractUsecase {
 	return &contractUsecase{
-		repo: repo,
+		db: db,
+		cr: cr,
+		lr: lr,
+		pr: pr,
 	}
 }
 
 func (uc *contractUsecase) Create(ctx context.Context, payload entity.CreateContractPayload) (string, error) {
-	nomor_kontrak := "INI-NOMOR-KONTRAK-YAA"
+
+	ctx, cancel := context.WithTimeout(ctx, 4*time.Second)
+	defer cancel()
+
+	claims := utils.ContextGetUser(ctx)
+	payload.ConsumerId = claims.ConsumerId
+
+	tx, err := uc.db.BeginTx(ctx, nil)
+	if err != nil {
+		return "", err
+	}
+
+	defer func() {
+		if err != nil {
+			tx.Rollback()
+		}
+	}()
+
+	// check apakah limit yg diinput sudah diapprove
+	limit, err := uc.lr.GetLimitById(ctx, tx, payload.LimitId)
+	if err != nil {
+		return "", err
+	}
+
+	if limit.Status != "APPROVED" {
+		return "", errors.New("please provide approved limit")
+	}
+
+	product, err := uc.pr.GetProductById(ctx, tx, payload.ProductId)
+	if err != nil {
+		return "", err
+	}
+
+	payload.Otr = product.Harga
+	payload.ProductCategory = product.Kategori
+
+	// buat kontrak
+	nomor_kontrak, err := uc.cr.Create(ctx, tx, payload)
+	if err != nil {
+		return "", err
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		return "", err
+	}
 
 	return nomor_kontrak, nil
+
 }
 
-func (uc *contractUsecase) Quote(ctx context.Context) error {
+func (uc *contractUsecase) GenerateQuote(ctx context.Context, nomor_kontrak string) error {
+
+	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
+	defer cancel()
+
+	tx, err := uc.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		if err != nil {
+			tx.Rollback()
+		}
+	}()
+
+	var payload entity.QuoteContractPayload
+
+	contract, err := uc.cr.GetByNomorKontrak(ctx, tx, nomor_kontrak)
+	if err != nil {
+		return err
+	}
+
+	payload.NomorKontrak = contract.NomorKontrak
+
+	adminFee := int(float64(contract.Otr) * 0.05)
+	bunga := int(float64(contract.Otr) * 0.02 * float64(contract.Tenor))
+
+	payload.AdminFee = adminFee
+	payload.JumlahBunga = bunga
+
+	err = uc.cr.Quote(ctx, tx, payload)
+	if err != nil {
+		return err
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 

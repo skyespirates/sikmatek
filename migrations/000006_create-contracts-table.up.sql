@@ -1,8 +1,8 @@
 CREATE TABLE IF NOT EXISTS contracts (
     nomor_kontrak VARCHAR(128) PRIMARY KEY,
-    otr INT NOT NULL,
-    admin_fee INT NOT NULL,
-    jumlah_bunga INT NOT NULL,
+    otr INT,
+    admin_fee INT,
+    jumlah_bunga INT,
     tenor INT CHECK(tenor IN (1, 2, 3, 6)),
     total_pembiayaan INT GENERATED ALWAYS AS (otr+admin_fee+jumlah_bunga) STORED,
     status ENUM('DRAFT', 'QUOTED', 'CANCELLED', 'CONFIRMED', 'ACTIVE', 'COMPLETED', 'DEFAULT') DEFAULT 'DRAFT',

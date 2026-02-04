@@ -11,7 +11,7 @@ type Limit struct {
 
 type CreateLimitPayload struct {
 	Requested  int `json:"requested_limit"`
-	ConsumerId int `json:"consumer_id"`
+	ConsumerId int
 }
 
 type UpdateLimitPayload struct {

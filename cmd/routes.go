@@ -14,10 +14,26 @@ import (
 func (app *application) routes() http.Handler {
 	router := httprouter.New()
 
-	userHandler := handler.NewUserHandler(usecase.NewUserUsecase(app.db, mysql.NewUserRepository(app.db), mysql.NewConsumerRepository()))
-	consumerHandler := handler.NewConsumerHandler(usecase.NewConsumerUsecase(app.db, mysql.NewConsumerRepository()))
-	limitHandler := handler.NewLimitHandler(usecase.NewLimitUsecase(app.db, mysql.NewLimitRepository()))
-	contractHandler := handler.NewContractHandler(usecase.NewContractUsecase(mysql.NewContractRepository()))
+	// repositories
+	userRepo := mysql.NewUserRepository(app.db)
+	consumerRepo := mysql.NewConsumerRepository()
+	limitRepo := mysql.NewLimitRepository()
+	contractRepo := mysql.NewContractRepository()
+	productRepo := mysql.NewProductRepository()
+
+	// usecases
+	userUC := usecase.NewUserUsecase(app.db, userRepo, consumerRepo)
+	consumerUC := usecase.NewConsumerUsecase(app.db, consumerRepo)
+	limitUC := usecase.NewLimitUsecase(app.db, limitRepo)
+	contractUC := usecase.NewContractUsecase(app.db, contractRepo, limitRepo, productRepo)
+	productUC := usecase.NewProductUsecase(app.db, productRepo)
+
+	// handlers
+	userHandler := handler.NewUserHandler(userUC)
+	consumerHandler := handler.NewConsumerHandler(consumerUC)
+	limitHandler := handler.NewLimitHandler(limitUC)
+	contractHandler := handler.NewContractHandler(contractUC)
+	productHandler := handler.NewProductHandler(productUC)
 
 	// serve static files, foto ktp dan selfie bisa diakses di sini
 	router.ServeFiles("/assets/*filepath", http.Dir("client/dist/assets"))
@@ -39,17 +55,17 @@ func (app *application) routes() http.Handler {
 
 	// limits service
 	router.HandlerFunc(http.MethodGet, "/v1/limits", app.authenticate(limitHandler.LimitList))
-	router.HandlerFunc(http.MethodPost, "/v1/pengajuan-limit", limitHandler.Pengajuan)
+	router.HandlerFunc(http.MethodPost, "/v1/pengajuan-limit", app.authenticate(limitHandler.Pengajuan))
 	router.HandlerFunc(http.MethodPatch, "/v1/pengajuan-limit/:limit_id/approve", limitHandler.Approve)
 	router.HandlerFunc(http.MethodPatch, "/v1/pengajuan-limit/:limit_id/reject", limitHandler.Reject)
 
 	// products service
-	router.HandlerFunc(http.MethodGet, "/v1/products", userHandler.Register)
-	router.HandlerFunc(http.MethodPost, "/v1/products", userHandler.Register)
+	router.HandlerFunc(http.MethodGet, "/v1/products", productHandler.List)
+	router.HandlerFunc(http.MethodPost, "/v1/products", productHandler.Create)
 
 	// contracts service
-	router.HandlerFunc(http.MethodPost, "/v1/kontrak", contractHandler.BuatKontrak)
-	router.HandlerFunc(http.MethodGet, "/v1/kontrak", contractHandler.ListKontrak)
+	router.HandlerFunc(http.MethodPost, "/v1/kontrak", app.authenticate(contractHandler.BuatKontrak))
+	router.HandlerFunc(http.MethodGet, "/v1/kontrak", app.authenticate(contractHandler.ListKontrak))
 	router.HandlerFunc(http.MethodPatch, "/v1/kontrak/:nomor_kontrak/quote", contractHandler.QuoteKontrak)
 	router.HandlerFunc(http.MethodPatch, "/v1/kontrak/:nomor_kontrak/confirm", contractHandler.ConfirmKontrak)
 	router.HandlerFunc(http.MethodPatch, "/v1/kontrak/:nomor_kontrak/cancel", contractHandler.CancelKontrak)
