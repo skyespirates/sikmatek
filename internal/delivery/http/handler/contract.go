@@ -97,7 +97,7 @@ func (h *contractHandler) ActivateKontrak(w http.ResponseWriter, r *http.Request
 	ps := httprouter.ParamsFromContext(r.Context())
 	nomor_kontrak := ps.ByName("nomor_kontrak")
 
-	err := h.uc.Confirm(r.Context(), nomor_kontrak)
+	err := h.uc.Activate(r.Context(), nomor_kontrak)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

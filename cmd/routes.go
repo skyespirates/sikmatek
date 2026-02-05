@@ -21,6 +21,7 @@ func (app *application) routes() http.Handler {
 	limitRepo := mysql.NewLimitRepository()
 	contractRepo := mysql.NewContractRepository()
 	productRepo := mysql.NewProductRepository()
+	installmentRepo := mysql.NewInstallmentRepository()
 
 	// usecases
 	userUC := usecase.NewUserUsecase(app.db, userRepo, consumerRepo)
@@ -28,6 +29,7 @@ func (app *application) routes() http.Handler {
 	limitUC := usecase.NewLimitUsecase(app.db, limitRepo)
 	contractUC := usecase.NewContractUsecase(app.db, contractRepo, limitRepo, productRepo)
 	productUC := usecase.NewProductUsecase(app.db, productRepo)
+	installmentUC := usecase.NewInstallmentUsecase(app.db, installmentRepo, contractRepo)
 
 	// handlers
 	userHandler := handler.NewUserHandler(userUC)
@@ -35,6 +37,7 @@ func (app *application) routes() http.Handler {
 	limitHandler := handler.NewLimitHandler(limitUC)
 	contractHandler := handler.NewContractHandler(contractUC)
 	productHandler := handler.NewProductHandler(productUC)
+	installmentHandler := handler.NewInstallmentHandler(installmentUC)
 
 	// serve static files, foto ktp dan selfie bisa diakses di sini
 	router.ServeFiles("/assets/*filepath", http.Dir("client/dist/assets"))
@@ -86,6 +89,8 @@ func (app *application) routes() http.Handler {
 
 		w.Write([]byte(name))
 	})
+
+	router.HandlerFunc(http.MethodPost, "/v1/installments/:nomor_kontrak/generate", app.authenticate(app.authorize(utils.Roles["admin"])(installmentHandler.GenerateInstallment)))
 
 	router.NotFound = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if strings.HasPrefix(r.URL.Path, "/assets/") {
