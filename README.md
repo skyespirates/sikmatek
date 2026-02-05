@@ -6,6 +6,10 @@
 
 ![use case](./docs/use_case.jpg)
 
+### Flow
+
+![flow](./docs/flow.jpg)
+
 ### ERD
 
 ![erd](./docs/erd.jpg)
