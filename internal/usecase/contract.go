@@ -27,14 +27,16 @@ type contractUsecase struct {
 	cr repository.ContractRepository
 	lr repository.LimitRepository
 	pr repository.ProductRepository
+	ir repository.InstallmentRepository
 }
 
-func NewContractUsecase(db *sql.DB, cr repository.ContractRepository, lr repository.LimitRepository, pr repository.ProductRepository) ContractUsecase {
+func NewContractUsecase(db *sql.DB, cr repository.ContractRepository, lr repository.LimitRepository, pr repository.ProductRepository, ir repository.InstallmentRepository) ContractUsecase {
 	return &contractUsecase{
 		db: db,
 		cr: cr,
 		lr: lr,
 		pr: pr,
+		ir: ir,
 	}
 }
 
@@ -218,6 +220,16 @@ func (uc *contractUsecase) Activate(ctx context.Context, nomor_kontrak string) e
 	payload.Action = "ACTIVE"
 
 	err = uc.cr.ConsumerAction(ctx, tx, payload)
+	if err != nil {
+		return err
+	}
+
+	err = uc.ir.CreateN(ctx, tx, contract.NomorKontrak, contract.Tenor)
+	if err != nil {
+		return err
+	}
+
+	err = tx.Commit()
 	if err != nil {
 		return err
 	}

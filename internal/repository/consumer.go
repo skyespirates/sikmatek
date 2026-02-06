@@ -9,7 +9,7 @@ import (
 type ConsumerRepository interface {
 	List(context.Context, QueryExecutor) ([]*entity.Consumer, error)
 	GetById(context.Context, QueryExecutor, int) (*entity.Consumer, error)
-	GetIdByUserId(context.Context, QueryExecutor, int) (int, error)
+	GetByUserId(context.Context, QueryExecutor, int) (*entity.Consumer, error)
 	Create(context.Context, QueryExecutor, int) (int, error)
 	Update(context.Context, QueryExecutor, int, entity.UpdateConsumerPayload) error
 	SetKtpPath(context.Context, QueryExecutor, int, string) error

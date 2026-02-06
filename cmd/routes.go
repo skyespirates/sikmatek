@@ -27,9 +27,10 @@ func (app *application) routes() http.Handler {
 	userUC := usecase.NewUserUsecase(app.db, userRepo, consumerRepo)
 	consumerUC := usecase.NewConsumerUsecase(app.db, consumerRepo)
 	limitUC := usecase.NewLimitUsecase(app.db, limitRepo)
-	contractUC := usecase.NewContractUsecase(app.db, contractRepo, limitRepo, productRepo)
+	contractUC := usecase.NewContractUsecase(app.db, contractRepo, limitRepo, productRepo, installmentRepo)
 	productUC := usecase.NewProductUsecase(app.db, productRepo)
 	installmentUC := usecase.NewInstallmentUsecase(app.db, installmentRepo, contractRepo)
+	dashboardUC := usecase.NewDashboardUsecase(app.db, consumerRepo, limitRepo, contractRepo, productRepo)
 
 	// handlers
 	userHandler := handler.NewUserHandler(userUC)
@@ -38,6 +39,7 @@ func (app *application) routes() http.Handler {
 	contractHandler := handler.NewContractHandler(contractUC)
 	productHandler := handler.NewProductHandler(productUC)
 	installmentHandler := handler.NewInstallmentHandler(installmentUC)
+	dashboardHandler := handler.NewDashboardHandler(dashboardUC)
 
 	// serve static files, foto ktp dan selfie bisa diakses di sini
 	router.ServeFiles("/assets/*filepath", http.Dir("client/dist/assets"))
@@ -77,6 +79,9 @@ func (app *application) routes() http.Handler {
 	router.HandlerFunc(http.MethodPatch, "/v1/kontrak/:nomor_kontrak/cicilan", app.authenticate(app.authorize(utils.Roles["consumer"])(contractHandler.CicilKontrak)))
 	router.HandlerFunc(http.MethodGet, "/v1/kontrak/:nomor_kontrak", app.authenticate(contractHandler.DetailKontrak))
 	router.HandlerFunc(http.MethodGet, "/v1/kontrak/:nomor_kontrak/installments", app.authenticate(contractHandler.DaftarCicilan))
+
+	// dashboard service
+	router.HandlerFunc(http.MethodGet, "/v1/dashboard/consumer", app.authenticate(app.authorize(utils.Roles["consumer"])(dashboardHandler.GetConsumerDashboard)))
 
 	router.HandlerFunc(http.MethodPost, "/v1/cicilan/:id/bayar", userHandler.Register)
 	router.HandlerFunc(http.MethodGet, "/v1/transactions", func(w http.ResponseWriter, r *http.Request) {

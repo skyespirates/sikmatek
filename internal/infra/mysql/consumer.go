@@ -33,17 +33,17 @@ func (r *consumerRepository) GetById(ctx context.Context, exec repository.QueryE
 
 }
 
-func (r *consumerRepository) GetIdByUserId(ctx context.Context, exec repository.QueryExecutor, user_id int) (int, error) {
+func (r *consumerRepository) GetByUserId(ctx context.Context, exec repository.QueryExecutor, user_id int) (*entity.Consumer, error) {
 
-	var id int
+	var c entity.Consumer
 
-	query := `SELECT id FROM consumers WHERE user_id = ?`
-	err := exec.QueryRowContext(ctx, query, user_id).Scan(&id)
+	query := `SELECT id, nik, full_name, legal_name, tempat_lahir, tanggal_lahir, gaji, foto_ktp, foto_selfie, is_verified, user_id FROM consumers WHERE user_id = ?`
+	err := exec.QueryRowContext(ctx, query, user_id).Scan(&c.Id, &c.Nik, &c.FullName, &c.LegalName, &c.TempatLahir, &c.TanggalLahir, &c.Gaji, &c.FotoKtp, &c.FotoSelfie, &c.IsVerified, &c.UserId)
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
 
-	return id, nil
+	return &c, nil
 
 }
 

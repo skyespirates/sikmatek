@@ -102,11 +102,11 @@ func (uc *userUsecase) Login(ctx context.Context, payload *entity.LoginPayload) 
 		consumerId = 0
 		isVerified = false
 	} else {
-		consumerId, err = uc.cr.GetIdByUserId(ctx, uc.db, user.Id)
+		consumer, err := uc.cr.GetByUserId(ctx, uc.db, user.Id)
 		if err != nil {
 			return "", err
 		}
-		isVerified, err = uc.cr.GetIsVerifiedById(ctx, uc.db, consumerId)
+		isVerified, err = uc.cr.GetIsVerifiedById(ctx, uc.db, consumer.Id)
 		if err != nil {
 			return "", err
 		}
