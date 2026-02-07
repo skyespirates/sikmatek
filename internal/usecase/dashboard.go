@@ -3,12 +3,13 @@ package usecase
 import (
 	"context"
 	"database/sql"
+	"log"
+	"sync"
 	"time"
 
 	"github.com/skyespirates/sikmatek/internal/entity"
 	"github.com/skyespirates/sikmatek/internal/repository"
 	"github.com/skyespirates/sikmatek/internal/utils"
-	"golang.org/x/sync/errgroup"
 )
 
 type DashboardUsecase interface {
@@ -35,13 +36,33 @@ func NewDashboardUsecase(db *sql.DB, cr repository.ConsumerRepository, lr reposi
 
 func (uc *dashboardUsecase) GetConsumerDashboardData(ctx context.Context) (map[string]any, error) {
 
-	data := map[string]any{}
-
 	ctx, cancel := context.WithTimeout(ctx, 4*time.Second)
 	defer cancel()
 
-	// prepare payload
 	claims := utils.ContextGetUser(ctx)
+	log.Printf("claims %+v", claims)
+
+	data := map[string]any{}
+
+	var mu sync.Mutex
+	var wg sync.WaitGroup
+
+	runTask := func(key string, task func() (any, error)) {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			res, err := task()
+
+			mu.Lock()
+			if err != nil {
+				log.Println(err.Error())
+				data[key+"_error"] = err.Error()
+			} else {
+				data[key] = res
+			}
+			mu.Unlock()
+		}()
+	}
 
 	limitPayload := entity.LimitListPayload{
 		RoleId:     claims.RoleId,
@@ -53,68 +74,23 @@ func (uc *dashboardUsecase) GetConsumerDashboardData(ctx context.Context) (map[s
 		ConsumerId: claims.ConsumerId,
 	}
 
-	var (
-		consumer  *entity.Consumer
-		limits    []*entity.Limit
-		contracts []*entity.Contract
-		products  []*entity.Product
-	)
-
-	g, ctx := errgroup.WithContext(ctx)
-
-	g.Go(func() error {
-		c, err := uc.cr.GetByUserId(ctx, uc.db, claims.Id)
-		if err != nil {
-			return err
-		}
-
-		consumer = c
-		return nil
+	runTask("profile_info", func() (any, error) {
+		return uc.cr.GetByUserId(ctx, uc.db, claims.Id)
 	})
 
-	g.Go(func() error {
-
-		l, err := uc.lr.GetLimitList(ctx, uc.db, limitPayload)
-		if err != nil {
-			return err
-		}
-
-		limits = l
-		return nil
-
+	runTask("limits", func() (any, error) {
+		return uc.lr.GetLimitList(ctx, uc.db, limitPayload)
 	})
 
-	g.Go(func() error {
-		c, err := uc.kr.List(ctx, uc.db, contractPayload)
-		if err != nil {
-			return err
-		}
-
-		contracts = c
-		return nil
-
+	runTask("contracts", func() (any, error) {
+		return uc.kr.List(ctx, uc.db, contractPayload)
 	})
 
-	g.Go(func() error {
-		p, err := uc.pr.GetProductList(ctx, uc.db)
-		if err != nil {
-			return err
-		}
-
-		products = p
-		return nil
-
+	runTask("products", func() (any, error) {
+		return uc.pr.GetProductList(ctx, uc.db)
 	})
 
-	err := g.Wait()
-	if err != nil {
-		return nil, err
-	}
-
-	data["profile_info"] = consumer
-	data["limits"] = limits
-	data["contracts"] = contracts
-	data["products"] = products
+	wg.Wait()
 
 	return data, nil
 

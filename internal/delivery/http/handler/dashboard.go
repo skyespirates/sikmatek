@@ -26,7 +26,6 @@ func (h *dashboardHandler) GetConsumerDashboard(w http.ResponseWriter, r *http.R
 
 	w.Header().Set("Content-Type", "application/json")
 
-	// Use the JSON encoder to write the data to the response
 	if err := json.NewEncoder(w).Encode(data); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
