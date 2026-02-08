@@ -45,7 +45,6 @@ func (uc *userUsecase) Register(ctx context.Context, payload *entity.RegisterPay
 		}
 	}()
 
-	// hash the password
 	hashed, err := bcrypt.GenerateFromPassword([]byte(payload.Password), 12)
 	if err != nil {
 		return "", err
