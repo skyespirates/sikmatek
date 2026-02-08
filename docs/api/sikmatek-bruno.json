@@ -1,0 +1,752 @@
+{
+  "name": "sikmatek",
+  "version": "1",
+  "items": [
+    {
+      "type": "http",
+      "name": "login",
+      "seq": 2,
+      "request": {
+        "url": "{{baseUrl}}/v1/auth/login",
+        "method": "POST",
+        "headers": [],
+        "params": [],
+        "body": {
+          "mode": "json",
+          "json": "{\n  \"email\": \"user01@gmail.com\",\n  \"password\": \"password\"\n}",
+          "formUrlEncoded": [],
+          "multipartForm": []
+        },
+        "script": {
+          "res": "bru.setEnvVar(\"token\", res.body.token)"
+        },
+        "vars": {},
+        "assertions": [],
+        "tests": "",
+        "docs": "",
+        "auth": {
+          "mode": "none"
+        }
+      }
+    },
+    {
+      "type": "http",
+      "name": "register",
+      "seq": 1,
+      "request": {
+        "url": "{{baseUrl}}/v1/auth/register",
+        "method": "POST",
+        "headers": [],
+        "params": [],
+        "body": {
+          "mode": "json",
+          "json": "{\n  \"email\":\"admin@gmail.com\",\n  \"password\": \"password\"\n}",
+          "formUrlEncoded": [],
+          "multipartForm": []
+        },
+        "script": {
+          "res": "bru.setEnvVar(\"token\", res.body.token)"
+        },
+        "vars": {},
+        "assertions": [],
+        "tests": "",
+        "docs": "",
+        "auth": {
+          "mode": "none"
+        }
+      }
+    },
+    {
+      "type": "folder",
+      "name": "dashboard",
+      "items": [
+        {
+          "type": "http",
+          "name": "consumer dashboard",
+          "seq": 1,
+          "request": {
+            "url": "{{baseUrl}}/v1/dashboard/consumer",
+            "method": "GET",
+            "headers": [
+              {
+                "name": "Authorization",
+                "value": "Bearer {{token}}",
+                "enabled": true
+              }
+            ],
+            "params": [],
+            "body": {
+              "mode": "none",
+              "formUrlEncoded": [],
+              "multipartForm": []
+            },
+            "script": {},
+            "vars": {},
+            "assertions": [],
+            "tests": "",
+            "docs": "",
+            "auth": {
+              "mode": "none"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "type": "folder",
+      "name": "consumer",
+      "items": [
+        {
+          "type": "http",
+          "name": "complete info",
+          "seq": 1,
+          "request": {
+            "url": "{{baseUrl}}/v1/consumers",
+            "method": "PUT",
+            "headers": [
+              {
+                "name": "Authorization",
+                "value": "Bearer {{token}}",
+                "enabled": true
+              }
+            ],
+            "params": [],
+            "body": {
+              "mode": "json",
+              "json": "{\n  \"nik\": \"1111\",\n  \"full_name\":\"skyes crawford\",\n  \"legal_name\": \"skyes\",\n  \"tempat_lahir\": \"bukittinggi\",\n  \"tanggal_lahir\": \"2000-08-07\",\n  \"gaji\": 1500000\n}",
+              "formUrlEncoded": [],
+              "multipartForm": []
+            },
+            "script": {},
+            "vars": {},
+            "assertions": [],
+            "tests": "",
+            "docs": "",
+            "auth": {
+              "mode": "none"
+            }
+          }
+        },
+        {
+          "type": "http",
+          "name": "upload ktp",
+          "seq": 2,
+          "request": {
+            "url": "{{baseUrl}}/v1/consumers/upload-ktp",
+            "method": "PUT",
+            "headers": [
+              {
+                "name": "Authorization",
+                "value": "Bearer {{token}}",
+                "enabled": true
+              }
+            ],
+            "params": [],
+            "body": {
+              "mode": "multipartForm",
+              "json": "{\n  \"nik\": \"131313131\"5,\n  \"full_name\":\"skyes crawford\",\n  \"legal_name\": \"skyes\",\n  \"tempat_lahir\": \"bukittinggi\",\n  \"tanggal_lahir\": \"2000-08-07\",\n  \"gaji\": 1500000\n}",
+              "formUrlEncoded": [],
+              "multipartForm": [
+                {
+                  "type": "file",
+                  "name": "image",
+                  "value": [
+                    "D:\\images\\ayammm.jpg"
+                  ],
+                  "enabled": true
+                }
+              ]
+            },
+            "script": {},
+            "vars": {},
+            "assertions": [],
+            "tests": "",
+            "docs": "",
+            "auth": {
+              "mode": "none"
+            }
+          }
+        },
+        {
+          "type": "http",
+          "name": "upload selfie",
+          "seq": 3,
+          "request": {
+            "url": "{{baseUrl}}/v1/consumers/upload-selfie",
+            "method": "PUT",
+            "headers": [
+              {
+                "name": "Authorization",
+                "value": "Bearer {{token}}",
+                "enabled": true
+              }
+            ],
+            "params": [],
+            "body": {
+              "mode": "multipartForm",
+              "json": "{\n  \"nik\": \"131313131\"5,\n  \"full_name\":\"skyes crawford\",\n  \"legal_name\": \"skyes\",\n  \"tempat_lahir\": \"bukittinggi\",\n  \"tanggal_lahir\": \"2000-08-07\",\n  \"gaji\": 1500000\n}",
+              "formUrlEncoded": [],
+              "multipartForm": [
+                {
+                  "type": "file",
+                  "name": "image",
+                  "value": [
+                    "D:\\images\\kucinggg.jpg"
+                  ],
+                  "enabled": true
+                }
+              ]
+            },
+            "script": {},
+            "vars": {},
+            "assertions": [],
+            "tests": "",
+            "docs": "",
+            "auth": {
+              "mode": "none"
+            }
+          }
+        },
+        {
+          "type": "http",
+          "name": "verify",
+          "seq": 4,
+          "request": {
+            "url": "{{baseUrl}}/v1/consumers/1/verify",
+            "method": "PATCH",
+            "headers": [
+              {
+                "name": "Authorization",
+                "value": "Bearer {{token}}",
+                "enabled": true
+              }
+            ],
+            "params": [],
+            "body": {
+              "mode": "none",
+              "json": "{\n  \"nik\": \"131313131\"5,\n  \"full_name\":\"skyes crawford\",\n  \"legal_name\": \"skyes\",\n  \"tempat_lahir\": \"bukittinggi\",\n  \"tanggal_lahir\": \"2000-08-07\",\n  \"gaji\": 1500000\n}",
+              "formUrlEncoded": [],
+              "multipartForm": [
+                {
+                  "type": "file",
+                  "name": "image",
+                  "value": [
+                    "D:\\images\\kucinggg.jpg"
+                  ],
+                  "enabled": true
+                }
+              ]
+            },
+            "script": {},
+            "vars": {},
+            "assertions": [],
+            "tests": "",
+            "docs": "",
+            "auth": {
+              "mode": "none"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "type": "folder",
+      "name": "installment",
+      "items": [
+        {
+          "type": "http",
+          "name": "generate installment",
+          "seq": 1,
+          "request": {
+            "url": "{{baseUrl}}/v1/installments/abc/generate",
+            "method": "POST",
+            "headers": [
+              {
+                "name": "Authorization",
+                "value": "Bearer {{token}}",
+                "enabled": true
+              }
+            ],
+            "params": [],
+            "body": {
+              "mode": "json",
+              "json": "{\n  \"product_id\": 3,\n  \"limit_id\": 2,\n  \"tenor\": 3\n}",
+              "formUrlEncoded": [],
+              "multipartForm": []
+            },
+            "script": {},
+            "vars": {},
+            "assertions": [],
+            "tests": "",
+            "docs": "",
+            "auth": {
+              "mode": "none"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "type": "folder",
+      "name": "kontrak",
+      "items": [
+        {
+          "type": "http",
+          "name": "activate",
+          "seq": 5,
+          "request": {
+            "url": "{{baseUrl}}/v1/kontrak/abc/activate",
+            "method": "PATCH",
+            "headers": [
+              {
+                "name": "Authorization",
+                "value": "Bearer {{token}}",
+                "enabled": true
+              }
+            ],
+            "params": [],
+            "body": {
+              "mode": "none",
+              "formUrlEncoded": [],
+              "multipartForm": []
+            },
+            "script": {},
+            "vars": {},
+            "assertions": [],
+            "tests": "",
+            "docs": "",
+            "auth": {
+              "mode": "none"
+            }
+          }
+        },
+        {
+          "type": "http",
+          "name": "buat kontrak",
+          "seq": 1,
+          "request": {
+            "url": "{{baseUrl}}/v1/kontrak",
+            "method": "POST",
+            "headers": [
+              {
+                "name": "Authorization",
+                "value": "Bearer {{token}}",
+                "enabled": true
+              }
+            ],
+            "params": [],
+            "body": {
+              "mode": "json",
+              "json": "{\n  \"product_id\": 3,\n  \"limit_id\": 1,\n  \"tenor\": 3\n}",
+              "formUrlEncoded": [],
+              "multipartForm": []
+            },
+            "script": {},
+            "vars": {},
+            "assertions": [],
+            "tests": "",
+            "docs": "",
+            "auth": {
+              "mode": "none"
+            }
+          }
+        },
+        {
+          "type": "http",
+          "name": "cancel",
+          "seq": 4,
+          "request": {
+            "url": "{{baseUrl}}/v1/kontrak/nomor_kontrak/cancel",
+            "method": "PATCH",
+            "headers": [],
+            "params": [],
+            "body": {
+              "mode": "none",
+              "formUrlEncoded": [],
+              "multipartForm": []
+            },
+            "script": {},
+            "vars": {},
+            "assertions": [],
+            "tests": "",
+            "docs": "",
+            "auth": {
+              "mode": "none"
+            }
+          }
+        },
+        {
+          "type": "http",
+          "name": "cicil",
+          "seq": 6,
+          "request": {
+            "url": "{{baseUrl}}/v1/kontrak/nomor_kontrak/cicilan",
+            "method": "PATCH",
+            "headers": [],
+            "params": [],
+            "body": {
+              "mode": "none",
+              "formUrlEncoded": [],
+              "multipartForm": []
+            },
+            "script": {},
+            "vars": {},
+            "assertions": [],
+            "tests": "",
+            "docs": "",
+            "auth": {
+              "mode": "none"
+            }
+          }
+        },
+        {
+          "type": "http",
+          "name": "confirm",
+          "seq": 3,
+          "request": {
+            "url": "{{baseUrl}}/v1/kontrak/WG-20260206-cb694efd/confirm",
+            "method": "PATCH",
+            "headers": [
+              {
+                "name": "Authorization",
+                "value": "Bearer {{token}}",
+                "enabled": true
+              }
+            ],
+            "params": [],
+            "body": {
+              "mode": "none",
+              "formUrlEncoded": [],
+              "multipartForm": []
+            },
+            "script": {},
+            "vars": {},
+            "assertions": [],
+            "tests": "",
+            "docs": "",
+            "auth": {
+              "mode": "none"
+            }
+          }
+        },
+        {
+          "type": "http",
+          "name": "daftar cicilan",
+          "seq": 8,
+          "request": {
+            "url": "{{baseUrl}}/v1/kontrak/nomor_kontrak/installments",
+            "method": "GET",
+            "headers": [],
+            "params": [],
+            "body": {
+              "mode": "none",
+              "formUrlEncoded": [],
+              "multipartForm": []
+            },
+            "script": {},
+            "vars": {},
+            "assertions": [],
+            "tests": "",
+            "docs": "",
+            "auth": {
+              "mode": "none"
+            }
+          }
+        },
+        {
+          "type": "http",
+          "name": "detail kontrak",
+          "seq": 7,
+          "request": {
+            "url": "{{baseUrl}}/v1/kontrak/nomor_kontrak",
+            "method": "GET",
+            "headers": [],
+            "params": [],
+            "body": {
+              "mode": "none",
+              "formUrlEncoded": [],
+              "multipartForm": []
+            },
+            "script": {},
+            "vars": {},
+            "assertions": [],
+            "tests": "",
+            "docs": "",
+            "auth": {
+              "mode": "none"
+            }
+          }
+        },
+        {
+          "type": "http",
+          "name": "list kontrak",
+          "seq": 9,
+          "request": {
+            "url": "{{baseUrl}}/v1/kontrak",
+            "method": "GET",
+            "headers": [
+              {
+                "name": "Authorization",
+                "value": "Bearer {{token}}",
+                "enabled": true
+              }
+            ],
+            "params": [],
+            "body": {
+              "mode": "none",
+              "formUrlEncoded": [],
+              "multipartForm": []
+            },
+            "script": {},
+            "vars": {},
+            "assertions": [],
+            "tests": "",
+            "docs": "",
+            "auth": {
+              "mode": "none"
+            }
+          }
+        },
+        {
+          "type": "http",
+          "name": "quote",
+          "seq": 2,
+          "request": {
+            "url": "{{baseUrl}}/v1/kontrak/abc/quote",
+            "method": "PATCH",
+            "headers": [
+              {
+                "name": "Authorization",
+                "value": "Bearer {{token}}",
+                "enabled": true
+              }
+            ],
+            "params": [],
+            "body": {
+              "mode": "none",
+              "formUrlEncoded": [],
+              "multipartForm": []
+            },
+            "script": {},
+            "vars": {},
+            "assertions": [],
+            "tests": "",
+            "docs": "",
+            "auth": {
+              "mode": "none"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "type": "folder",
+      "name": "produk",
+      "items": [
+        {
+          "type": "http",
+          "name": "list produk",
+          "seq": 1,
+          "request": {
+            "url": "{{baseUrl}}/v1/products",
+            "method": "GET",
+            "headers": [],
+            "params": [],
+            "body": {
+              "mode": "none",
+              "formUrlEncoded": [],
+              "multipartForm": []
+            },
+            "script": {},
+            "vars": {},
+            "assertions": [],
+            "tests": "",
+            "docs": "",
+            "auth": {
+              "mode": "none"
+            }
+          }
+        },
+        {
+          "type": "http",
+          "name": "tambah produk",
+          "seq": 2,
+          "request": {
+            "url": "{{baseUrl}}/v1/products",
+            "method": "POST",
+            "headers": [
+              {
+                "name": "Authorization",
+                "value": "Bearer {{token}}",
+                "enabled": true
+              }
+            ],
+            "params": [],
+            "body": {
+              "mode": "json",
+              "json": "{\n  \"nama\":\"AC Besar\",\n  \"kategori\": \"WHITE_GOODS\",\n  \"harga\": 4500000\n}",
+              "formUrlEncoded": [],
+              "multipartForm": []
+            },
+            "script": {},
+            "vars": {},
+            "assertions": [],
+            "tests": "",
+            "docs": "",
+            "auth": {
+              "mode": "none"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "type": "folder",
+      "name": "limit",
+      "items": [
+        {
+          "type": "http",
+          "name": "approve limit",
+          "seq": 2,
+          "request": {
+            "url": "{{baseUrl}}/v1/pengajuan-limit/2/approve",
+            "method": "PATCH",
+            "headers": [],
+            "params": [],
+            "body": {
+              "mode": "json",
+              "json": "{\n  \"durasi_bulan\": 6\n}",
+              "formUrlEncoded": [],
+              "multipartForm": []
+            },
+            "script": {},
+            "vars": {},
+            "assertions": [],
+            "tests": "",
+            "docs": "",
+            "auth": {
+              "mode": "none"
+            }
+          }
+        },
+        {
+          "type": "http",
+          "name": "list limit",
+          "seq": 4,
+          "request": {
+            "url": "{{baseUrl}}/v1/limits",
+            "method": "GET",
+            "headers": [
+              {
+                "name": "Authorization",
+                "value": "Bearer {{token}}",
+                "enabled": true
+              }
+            ],
+            "params": [],
+            "body": {
+              "mode": "none",
+              "formUrlEncoded": [],
+              "multipartForm": []
+            },
+            "script": {},
+            "vars": {},
+            "assertions": [],
+            "tests": "",
+            "docs": "",
+            "auth": {
+              "mode": "none"
+            }
+          }
+        },
+        {
+          "type": "http",
+          "name": "pengajuan limit",
+          "seq": 1,
+          "request": {
+            "url": "{{baseUrl}}/v1/pengajuan-limit",
+            "method": "POST",
+            "headers": [
+              {
+                "name": "Authorization",
+                "value": "Bearer {{token}}",
+                "enabled": true
+              }
+            ],
+            "params": [],
+            "body": {
+              "mode": "json",
+              "json": "{\n  \"requested_limit\": 10000000\n}",
+              "formUrlEncoded": [],
+              "multipartForm": []
+            },
+            "script": {},
+            "vars": {},
+            "assertions": [],
+            "tests": "",
+            "docs": "",
+            "auth": {
+              "mode": "none"
+            }
+          }
+        },
+        {
+          "type": "http",
+          "name": "reject limit",
+          "seq": 3,
+          "request": {
+            "url": "{{baseUrl}}/v1/pengajuan-limit/4/reject",
+            "method": "PATCH",
+            "headers": [],
+            "params": [],
+            "body": {
+              "mode": "json",
+              "json": "{\n  \"durasi_bulan\": 6\n}",
+              "formUrlEncoded": [],
+              "multipartForm": []
+            },
+            "script": {},
+            "vars": {},
+            "assertions": [],
+            "tests": "",
+            "docs": "",
+            "auth": {
+              "mode": "none"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "activeEnvironmentUid": "hfFLi3mDt7Y110ezFNjVd",
+  "environments": [
+    {
+      "variables": [
+        {
+          "name": "baseUrl",
+          "value": "http://localhost:3000",
+          "enabled": true,
+          "secret": false,
+          "type": "text"
+        },
+        {
+          "name": "token",
+          "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiZW1haWwiOiJhZG1pbkBnbWFpbC5jb20iLCJyb2xlX2lkIjoxLCJjb25zdW1lcl9pZCI6MCwiaXNfdmVyaWZpZWQiOmZhbHNlLCJleHAiOjE3NzAzOTA0MTEsImlhdCI6MTc3MDMwNDAxMX0.Ix4IWU2PHEovW18MjgvozSfZNDHpqL3Dfko5BM2mCWg",
+          "enabled": true,
+          "secret": false,
+          "type": "text"
+        }
+      ],
+      "name": "sikmatek"
+    }
+  ],
+  "brunoConfig": {
+    "version": "1",
+    "name": "sikmatek",
+    "type": "collection",
+    "ignore": [
+      "node_modules",
+      ".git"
+    ]
+  }
+}
