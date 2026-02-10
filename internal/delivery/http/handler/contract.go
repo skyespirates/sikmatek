@@ -103,8 +103,8 @@ func (h *contractHandler) ActivateKontrak(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	fmt.Fprintf(w, "contract %s has activated", nomor_kontrak)
 	w.WriteHeader(http.StatusNoContent)
+	fmt.Fprintf(w, "contract %s has activated", nomor_kontrak)
 
 }
 

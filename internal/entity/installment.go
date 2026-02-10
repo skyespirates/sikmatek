@@ -1,5 +1,7 @@
 package entity
 
+import "time"
+
 type Installment struct {
 	ID            int    `json:"id"`
 	NomorKontrak  string `json:"string"`
@@ -8,4 +10,11 @@ type Installment struct {
 	DueDate       string `json:"due_date"`
 	Status        string `json:"status"`
 	PaidAt        string `json:"paid_at"`
+}
+
+type CreateInstallmentPayload struct {
+	NomorKontrak    string
+	TotalPembiayaan int
+	Tenor           int
+	StartDate       time.Time
 }

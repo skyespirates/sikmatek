@@ -1,7 +1,11 @@
 package repository
 
-import "context"
+import (
+	"context"
+
+	"github.com/skyespirates/sikmatek/internal/entity"
+)
 
 type InstallmentRepository interface {
-	CreateN(context.Context, QueryExecutor, string, int) error
+	CreateN(context.Context, QueryExecutor, entity.CreateInstallmentPayload) error
 }

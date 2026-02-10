@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"time"
 
+	"github.com/skyespirates/sikmatek/internal/entity"
 	"github.com/skyespirates/sikmatek/internal/repository"
 )
 
@@ -47,7 +48,12 @@ func (uc *installmentUsecase) GenerateInstallment(ctx context.Context, nomor_kon
 		return err
 	}
 
-	err = uc.ir.CreateN(ctx, tx, contract.NomorKontrak, contract.Tenor)
+	payload := entity.CreateInstallmentPayload{
+		NomorKontrak:    contract.NomorKontrak,
+		TotalPembiayaan: *contract.TotalPembiayaan,
+		Tenor:           contract.Tenor,
+	}
+	err = uc.ir.CreateN(ctx, tx, payload)
 	if err != nil {
 		return err
 	}

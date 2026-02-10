@@ -10,6 +10,7 @@ import (
 	"github.com/julienschmidt/httprouter"
 	"github.com/skyespirates/sikmatek/internal/entity"
 	"github.com/skyespirates/sikmatek/internal/usecase"
+	"github.com/skyespirates/sikmatek/internal/utils"
 )
 
 type limitHandler struct {
@@ -32,13 +33,9 @@ func (h *limitHandler) LimitList(w http.ResponseWriter, r *http.Request) {
 
 	resp := map[string]any{}
 
-	resp["message"] = "limit list"
 	resp["limit"] = limit
 
-	err = json.NewEncoder(w).Encode(resp)
-	if err != nil {
-		http.Error(w, "error encoding", http.StatusInternalServerError)
-	}
+	utils.JSONResponse(w, "list limit", resp)
 
 }
 

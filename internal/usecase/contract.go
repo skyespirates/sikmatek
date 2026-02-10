@@ -224,7 +224,14 @@ func (uc *contractUsecase) Activate(ctx context.Context, nomor_kontrak string) e
 		return err
 	}
 
-	err = uc.ir.CreateN(ctx, tx, contract.NomorKontrak, contract.Tenor)
+	create_installment_payload := entity.CreateInstallmentPayload{
+		NomorKontrak:    contract.NomorKontrak,
+		TotalPembiayaan: *contract.TotalPembiayaan,
+		Tenor:           contract.Tenor,
+		StartDate:       time.Now(),
+	}
+
+	err = uc.ir.CreateN(ctx, tx, create_installment_payload)
 	if err != nil {
 		return err
 	}
