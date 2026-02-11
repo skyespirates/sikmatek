@@ -22,6 +22,7 @@ func (app *application) routes() http.Handler {
 	contractRepo := mysql.NewContractRepository()
 	productRepo := mysql.NewProductRepository()
 	installmentRepo := mysql.NewInstallmentRepository()
+	limitUsageRepo := mysql.NewLimitUsageRepository()
 
 	// usecases
 	userUC := usecase.NewUserUsecase(app.db, userRepo, consumerRepo)
@@ -29,7 +30,7 @@ func (app *application) routes() http.Handler {
 	limitUC := usecase.NewLimitUsecase(app.db, limitRepo)
 	contractUC := usecase.NewContractUsecase(app.db, contractRepo, limitRepo, productRepo, installmentRepo)
 	productUC := usecase.NewProductUsecase(app.db, productRepo)
-	installmentUC := usecase.NewInstallmentUsecase(app.db, installmentRepo, contractRepo)
+	installmentUC := usecase.NewInstallmentUsecase(app.db, installmentRepo, contractRepo, limitUsageRepo)
 	dashboardUC := usecase.NewDashboardUsecase(app.db, consumerRepo, limitRepo, contractRepo, productRepo)
 
 	// handlers
@@ -78,7 +79,9 @@ func (app *application) routes() http.Handler {
 	router.HandlerFunc(http.MethodPatch, "/v1/kontrak/:nomor_kontrak/activate", app.authenticate(app.authorize(utils.Roles["admin"])(contractHandler.ActivateKontrak)))
 	router.HandlerFunc(http.MethodPatch, "/v1/kontrak/:nomor_kontrak/cicilan", app.authenticate(app.authorize(utils.Roles["consumer"])(contractHandler.CicilKontrak)))
 	router.HandlerFunc(http.MethodGet, "/v1/kontrak/:nomor_kontrak", app.authenticate(contractHandler.DetailKontrak))
-	router.HandlerFunc(http.MethodGet, "/v1/kontrak/:nomor_kontrak/installments", app.authenticate(contractHandler.DaftarCicilan))
+
+	// installment service
+	router.HandlerFunc(http.MethodPut, "/v1/installments/:id", app.authenticate(installmentHandler.PayInstallment))
 
 	// dashboard service
 	router.HandlerFunc(http.MethodGet, "/v1/dashboard/consumer", app.authenticate(app.authorize(utils.Roles["consumer"])(dashboardHandler.GetConsumerDashboard)))

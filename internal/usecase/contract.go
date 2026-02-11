@@ -74,6 +74,10 @@ func (uc *contractUsecase) Create(ctx context.Context, payload entity.CreateCont
 		return "", err
 	}
 
+	if limit.Requested < product.Harga {
+		return "", errors.New("insufficient limit")
+	}
+
 	payload.Otr = product.Harga
 	payload.ProductCategory = product.Kategori
 

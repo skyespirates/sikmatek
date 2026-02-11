@@ -1,6 +1,9 @@
 package entity
 
-import "time"
+import (
+	"errors"
+	"time"
+)
 
 type Installment struct {
 	ID            int    `json:"id"`
@@ -18,3 +21,11 @@ type CreateInstallmentPayload struct {
 	Tenor           int
 	StartDate       time.Time
 }
+
+type InstallmentInfo struct {
+	JumlahTagihan int
+	LimitId       int
+	Status        string
+}
+
+var ErrDuplicatePayment = errors.New("cicilan bulan ini sudah lunas")
