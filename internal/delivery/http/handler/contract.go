@@ -9,6 +9,7 @@ import (
 	"github.com/julienschmidt/httprouter"
 	"github.com/skyespirates/sikmatek/internal/entity"
 	"github.com/skyespirates/sikmatek/internal/usecase"
+	"github.com/skyespirates/sikmatek/internal/utils"
 )
 
 type contractHandler struct {
@@ -37,13 +38,26 @@ func (h *contractHandler) BuatKontrak(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	resp := map[string]any{}
+
+	resp["nomor_kontrak"] = nomor_kontrak
+
 	resource := fmt.Sprintf("/v1/kontrak/%s", nomor_kontrak)
 	w.Header().Set("Location", resource)
 	w.WriteHeader(http.StatusCreated)
+	utils.JSONResponse(w, "berhasil membuat kontrak", resp)
 }
 
 func (h *contractHandler) ListKontrak(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("List Kontrak"))
+
+	contract, err := h.uc.DaftarKontrak(r.Context())
+	if err != nil {
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	utils.JSONResponse(w, "daftar kontrak", contract)
+
 }
 
 func (h *contractHandler) QuoteKontrak(w http.ResponseWriter, r *http.Request) {

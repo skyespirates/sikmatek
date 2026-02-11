@@ -81,7 +81,11 @@ func (r *limitRepository) GetLimitList(ctx context.Context, exec repository.Quer
 			cl.id, 
 			cl.requested_limit, 
 			COALESCE(SUM(lu.used_amount), 0) as used_limit, 
-			requested_limit - COALESCE(SUM(lu.used_amount), 0) as remaining_limit, 
+			CASE 
+				WHEN cl.status = 'APPROVED'
+					THEN requested_limit - COALESCE(SUM(lu.used_amount), 0)
+				ELSE 0
+			END AS remaining_limit, 
 			cl.status, 
 			cl.approved_by, 
 			cl.approved_at, 

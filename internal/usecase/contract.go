@@ -19,7 +19,7 @@ type ContractUsecase interface {
 	Activate(context.Context, string) error
 	Cicil(context.Context) error
 	Detail(context.Context) error
-	DaftarKontrak(context.Context) error
+	DaftarKontrak(context.Context) ([]*entity.Contract, error)
 }
 
 type contractUsecase struct {
@@ -257,6 +257,22 @@ func (uc *contractUsecase) Detail(ctx context.Context) error {
 	return nil
 }
 
-func (uc *contractUsecase) DaftarKontrak(ctx context.Context) error {
-	return nil
+func (uc *contractUsecase) DaftarKontrak(ctx context.Context) ([]*entity.Contract, error) {
+
+	claims := utils.ContextGetUser(ctx)
+	payload := entity.ListContractPayload{
+		RoleId:     claims.RoleId,
+		ConsumerId: claims.ConsumerId,
+	}
+
+	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
+	defer cancel()
+
+	contract, err := uc.cr.List(ctx, uc.db, payload)
+	if err != nil {
+		return nil, err
+	}
+
+	return contract, nil
+
 }
