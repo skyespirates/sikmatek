@@ -11,7 +11,7 @@ import (
 )
 
 type LimitUsecase interface {
-	GetList(context.Context) ([]*entity.Limit, error)
+	GetList(context.Context) ([]*entity.LimitDetail, error)
 	AjukanLimit(context.Context, entity.CreateLimitPayload) (int64, error)
 	TindakLanjut(context.Context, entity.UpdateLimitPayload) error
 }
@@ -28,7 +28,7 @@ func NewLimitUsecase(db *sql.DB, repo repository.LimitRepository) LimitUsecase {
 	}
 }
 
-func (uc *limitUsecase) GetList(ctx context.Context) ([]*entity.Limit, error) {
+func (uc *limitUsecase) GetList(ctx context.Context) ([]*entity.LimitDetail, error) {
 
 	claims := utils.ContextGetUser(ctx)
 

@@ -71,30 +71,46 @@ func (r *limitRepository) GetLimitById(ctx context.Context, exec repository.Quer
 
 }
 
-func (r *limitRepository) GetLimitList(ctx context.Context, exec repository.QueryExecutor, payload entity.LimitListPayload) ([]*entity.Limit, error) {
+func (r *limitRepository) GetLimitList(ctx context.Context, exec repository.QueryExecutor, payload entity.LimitListPayload) ([]*entity.LimitDetail, error) {
 
 	// role["admin"] = 1
 	// role["consumer"] = 2
 
-	query := `SELECT id, requested_limit, status, approved_by, approved_at, consumer_id FROM credit_limits `
+	query := `
+		SELECT 
+			cl.id, 
+			cl.requested_limit, 
+			COALESCE(SUM(lu.used_amount), 0) as used_limit, 
+			requested_limit - COALESCE(SUM(lu.used_amount), 0) as remaining_limit, 
+			cl.status, 
+			cl.approved_by, 
+			cl.approved_at, 
+			cl.consumer_id 
+		FROM credit_limits cl 
+		LEFT JOIN limit_usages lu ON
+			cl.id = lu.limit_id
+	`
+
 	args := []any{}
 
 	if payload.RoleId == utils.Roles["consumer"] {
-		query += `WHERE consumer_id = ?`
+		query += `WHERE cl.consumer_id = ? `
 		args = append(args, payload.ConsumerId)
 	}
+
+	query += `GROUP BY cl.id, cl.requested_limit, cl.status, cl.approved_by, cl.approved_at, cl.consumer_id`
 
 	rows, err := exec.QueryContext(ctx, query, args...)
 	if err != nil {
 		return nil, err
 	}
 
-	var limits []*entity.Limit
+	var limits []*entity.LimitDetail
 	for rows.Next() {
 
-		var l entity.Limit
+		var l entity.LimitDetail
 
-		err = rows.Scan(&l.Id, &l.Requested, &l.Status, &l.ApprovedBy, &l.ApprovedAt, &l.ConsumerId)
+		err = rows.Scan(&l.Id, &l.Requested, &l.Used, &l.Remaining, &l.Status, &l.ApprovedBy, &l.ApprovedAt, &l.ConsumerId)
 		if err != nil {
 			return nil, err
 		}

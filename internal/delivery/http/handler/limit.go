@@ -27,6 +27,7 @@ func (h *limitHandler) LimitList(w http.ResponseWriter, r *http.Request) {
 
 	limit, err := h.uc.GetList(r.Context())
 	if err != nil {
+		log.Println(err.Error())
 		http.Error(w, "internal server error", http.StatusInternalServerError)
 		return
 	}

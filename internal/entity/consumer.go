@@ -29,3 +29,7 @@ type ConsumerActionPayload struct {
 	NomorKontrak string
 	Action       string
 }
+
+type ConsumerId struct {
+	Id int
+}

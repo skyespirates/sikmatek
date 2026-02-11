@@ -9,6 +9,17 @@ type Limit struct {
 	ConsumerId int     `json:"consumer_id"`
 }
 
+type LimitDetail struct {
+	Id         int     `json:"id"`
+	Requested  int     `json:"requested_limit"`
+	Used       int     `json:"used_limit"`
+	Remaining  int     `json:"remaining_limit"`
+	Status     string  `json:"status"`
+	ApprovedBy *int    `json:"approved_by,omitempty"`
+	ApprovedAt *string `json:"approved_at,omitempty"`
+	ConsumerId int     `json:"consumer_id"`
+}
+
 type CreateLimitPayload struct {
 	Requested  int `json:"requested_limit"`
 	ConsumerId int

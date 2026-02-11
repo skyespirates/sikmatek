@@ -171,3 +171,18 @@ func (r *consumerRepository) GetIsVerifiedById(ctx context.Context, exec reposit
 	return isVerified == 1, nil
 
 }
+
+func (r *consumerRepository) GetIdByUserId(ctx context.Context, exec repository.QueryExecutor, user_id int) (*entity.ConsumerId, error) {
+
+	query := `SELECT id FROM consumers WHERE user_id = ?`
+
+	var cid entity.ConsumerId
+
+	err := exec.QueryRowContext(ctx, query, user_id).Scan(&cid.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	return &cid, nil
+
+}
