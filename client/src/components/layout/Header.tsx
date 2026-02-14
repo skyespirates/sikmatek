@@ -1,4 +1,3 @@
-import React from "react";
 import { Bell, Search, User, Settings, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,9 +10,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
+import { logout, getUser } from "@/lib/auth";
 
 const Header = () => {
+  const user = getUser();
+
   return (
     <header className="sticky top-0 z-30 w-full h-16 px-6 flex items-center justify-between bg-white/60 backdrop-blur-md border-b border-slate-200/60">
       <div className="flex items-center gap-4 md:pl-64 w-full">
@@ -40,7 +41,7 @@ const Header = () => {
           <DropdownMenuTrigger asChild>
             <Button
               variant="ghost"
-              className="relative h-9 w-9 rounded-full ring-2 ring-slate-100 p-0 overflow-hidden"
+              className="relative h-9 w-9 rounded-full ring-2 ring-slate-100 p-0 overflow-hidden cursor-pointer"
             >
               <Avatar className="h-9 w-9">
                 <AvatarImage
@@ -56,7 +57,7 @@ const Header = () => {
               <div className="flex flex-col space-y-1">
                 <p className="text-sm font-medium leading-none">Jake Doe</p>
                 <p className="text-xs leading-none text-muted-foreground">
-                  jake@example.com
+                  {user?.email}
                 </p>
               </div>
             </DropdownMenuLabel>
@@ -70,7 +71,10 @@ const Header = () => {
               <span>Settings</span>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-50">
+            <DropdownMenuItem
+              onClick={() => logout()}
+              className="cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-50"
+            >
               <LogOut className="mr-2 h-4 w-4" />
               <span>Log out</span>
             </DropdownMenuItem>

@@ -9,42 +9,65 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useState } from "react";
+import { PriceInput } from "./PriceInput";
+import { createLimit } from "@/services/limit";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-export function Modals() {
+function Modals() {
+  const [rawValue, setRawValue] = useState("");
+  const [open, setOpen] = useState(false);
+  const queryClient = useQueryClient();
+  const mutation = useMutation({
+    mutationFn: createLimit,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["limits"] });
+      setOpen(false);
+    },
+  });
   return (
-    <Dialog>
+    <Dialog open={open}>
       <form>
         <DialogTrigger asChild>
-          <Button variant="outline">Open Dialog</Button>
+          <Button
+            variant="outline"
+            className="cursor-pointer"
+            onClick={() => setOpen(true)}
+          >
+            Ajukan Limit
+          </Button>
         </DialogTrigger>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="sm:max-w-106.25">
           <DialogHeader>
-            <DialogTitle>Edit profile</DialogTitle>
+            <DialogTitle>Pengajuan Limit</DialogTitle>
             <DialogDescription>
-              Make changes to your profile here. Click save when you&apos;re
-              done.
+              Lengkapi informasi yang dibutuhkan untuk pengajuan limit.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4">
             <div className="grid gap-3">
-              <Label htmlFor="name-1">Name</Label>
-              <Input id="name-1" name="name" defaultValue="Pedro Duarte" />
-            </div>
-            <div className="grid gap-3">
-              <Label htmlFor="username-1">Username</Label>
-              <Input id="username-1" name="username" defaultValue="@peduarte" />
+              <Label htmlFor="nominal">Nominal Limit (Rp)</Label>
+              <PriceInput onChange={setRawValue} />
             </div>
           </div>
           <DialogFooter>
             <DialogClose asChild>
-              <Button variant="outline">Cancel</Button>
+              <Button onClick={() => setOpen(false)} variant="outline">
+                Batal
+              </Button>
             </DialogClose>
-            <Button type="submit">Save changes</Button>
+            <Button
+              type="submit"
+              onClick={() => mutation.mutate(Number(rawValue))}
+            >
+              Ajukan
+            </Button>
           </DialogFooter>
         </DialogContent>
       </form>
     </Dialog>
   );
 }
+
+export default Modals;

@@ -56,7 +56,10 @@ func (h *contractHandler) ListKontrak(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	utils.JSONResponse(w, "daftar kontrak", contract)
+	resp := map[string]any{}
+	resp["kontrak"] = contract
+
+	utils.JSONResponse(w, "daftar kontrak", resp)
 
 }
 

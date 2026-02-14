@@ -41,10 +41,7 @@ const NotFound = () => {
               Go Back
             </Link>
           </Button>
-          <Button
-            asChild
-            className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700"
-          >
+          <Button asChild className="w-full sm:w-auto">
             <Link to="/" className="flex items-center gap-2">
               <Home className="h-4 w-4" />
               Back to Home

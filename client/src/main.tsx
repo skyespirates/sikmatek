@@ -13,7 +13,15 @@ import Dashboard from "./pages/Dashboard";
 import Limits from "@/pages/Limit";
 import Contracts from "@/pages/Contract";
 
-export const queryClient = new QueryClient();
+export const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      retry: 1,
+      staleTime: 1000 * 60,
+    },
+  },
+});
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

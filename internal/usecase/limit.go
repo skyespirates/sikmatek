@@ -12,7 +12,7 @@ import (
 
 type LimitUsecase interface {
 	GetList(context.Context) ([]*entity.LimitDetail, error)
-	AjukanLimit(context.Context, entity.CreateLimitPayload) (int64, error)
+	AjukanLimit(context.Context, int) (int64, error)
 	TindakLanjut(context.Context, entity.UpdateLimitPayload) error
 }
 
@@ -44,13 +44,17 @@ func (uc *limitUsecase) GetList(ctx context.Context) ([]*entity.LimitDetail, err
 
 }
 
-func (uc *limitUsecase) AjukanLimit(ctx context.Context, payload entity.CreateLimitPayload) (int64, error) {
+func (uc *limitUsecase) AjukanLimit(ctx context.Context, requested_limit int) (int64, error) {
 
 	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
 	defer cancel()
 
 	claims := utils.ContextGetUser(ctx)
-	payload.ConsumerId = claims.ConsumerId
+
+	payload := entity.CreateLimitPayload{
+		Requested:  requested_limit,
+		ConsumerId: claims.ConsumerId,
+	}
 
 	tx, err := uc.db.BeginTx(ctx, nil)
 	if err != nil {

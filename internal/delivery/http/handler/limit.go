@@ -42,7 +42,9 @@ func (h *limitHandler) LimitList(w http.ResponseWriter, r *http.Request) {
 
 func (h *limitHandler) Pengajuan(w http.ResponseWriter, r *http.Request) {
 
-	var payload entity.CreateLimitPayload
+	var payload struct {
+		Requested int `json:"requested_limit"`
+	}
 
 	err := json.NewDecoder(r.Body).Decode(&payload)
 	if err != nil {
@@ -50,7 +52,7 @@ func (h *limitHandler) Pengajuan(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id, err := h.uc.AjukanLimit(r.Context(), payload)
+	id, err := h.uc.AjukanLimit(r.Context(), payload.Requested)
 	if err != nil {
 		log.Printf("error: %s", err.Error())
 		http.Error(w, "internal server error", http.StatusInternalServerError)
