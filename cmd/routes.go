@@ -50,44 +50,44 @@ func (app *application) routes() http.Handler {
 	router.HandlerFunc(http.MethodGet, "/healthcheck", healthcheck)
 
 	// auth service
-	router.HandlerFunc(http.MethodPost, "/v1/auth/register", userHandler.Register)
-	router.HandlerFunc(http.MethodPost, "/v1/auth/login", userHandler.Login)
+	router.HandlerFunc(http.MethodPost, "/api/v1/auth/register", userHandler.Register)
+	router.HandlerFunc(http.MethodPost, "/api/v1/auth/login", userHandler.Login)
 
 	// consumers service
-	router.HandlerFunc(http.MethodPut, "/v1/consumers", app.authenticate(app.authorize(utils.Roles["consumer"])(consumerHandler.CompleteConsumerInfo)))
-	router.HandlerFunc(http.MethodPut, "/v1/consumers/upload-ktp", app.authenticate(app.authorize(utils.Roles["consumer"])(consumerHandler.UploadKtp)))
-	router.HandlerFunc(http.MethodPut, "/v1/consumers/upload-selfie", app.authenticate(app.authorize(utils.Roles["consumer"])(consumerHandler.UploadSelfie)))
-	router.HandlerFunc(http.MethodPatch, "/v1/consumers/:consumer_id/verify", app.authenticate(app.authorize(utils.Roles["admin"])(consumerHandler.VerifyConsumer)))
-	router.HandlerFunc(http.MethodGet, "/v1/consumers/limits/:limit_id/sisa-limit", consumerHandler.CheckLimit)
+	router.HandlerFunc(http.MethodPut, "/api/v1/consumers", app.authenticate(app.authorize(utils.Roles["consumer"])(consumerHandler.CompleteConsumerInfo)))
+	router.HandlerFunc(http.MethodPut, "/api/v1/consumers/upload-ktp", app.authenticate(app.authorize(utils.Roles["consumer"])(consumerHandler.UploadKtp)))
+	router.HandlerFunc(http.MethodPut, "/api/v1/consumers/upload-selfie", app.authenticate(app.authorize(utils.Roles["consumer"])(consumerHandler.UploadSelfie)))
+	router.HandlerFunc(http.MethodPatch, "/api/v1/consumers/:consumer_id/verify", app.authenticate(app.authorize(utils.Roles["admin"])(consumerHandler.VerifyConsumer)))
+	router.HandlerFunc(http.MethodGet, "/api/v1/consumers/limits/:limit_id/sisa-limit", consumerHandler.CheckLimit)
 
 	// limits service
-	router.HandlerFunc(http.MethodGet, "/v1/limits", app.authenticate(app.authorize(utils.Roles["admin"], utils.Roles["consumer"])(limitHandler.LimitList)))
-	router.HandlerFunc(http.MethodPost, "/v1/pengajuan-limit", app.authenticate(app.authorize(utils.Roles["consumer"])(limitHandler.Pengajuan)))
-	router.HandlerFunc(http.MethodPatch, "/v1/pengajuan-limit/:limit_id/approve", app.authenticate(app.authorize(utils.Roles["admin"])(limitHandler.Approve)))
-	router.HandlerFunc(http.MethodPatch, "/v1/pengajuan-limit/:limit_id/reject", app.authenticate(app.authorize(utils.Roles["admin"])(limitHandler.Reject)))
+	router.HandlerFunc(http.MethodGet, "/api/v1/limits", app.authenticate(app.authorize(utils.Roles["admin"], utils.Roles["consumer"])(limitHandler.LimitList)))
+	router.HandlerFunc(http.MethodPost, "/api/v1/pengajuan-limit", app.authenticate(app.authorize(utils.Roles["consumer"])(limitHandler.Pengajuan)))
+	router.HandlerFunc(http.MethodPatch, "/api/v1/pengajuan-limit/:limit_id/approve", app.authenticate(app.authorize(utils.Roles["admin"])(limitHandler.Approve)))
+	router.HandlerFunc(http.MethodPatch, "/api/v1/pengajuan-limit/:limit_id/reject", app.authenticate(app.authorize(utils.Roles["admin"])(limitHandler.Reject)))
 
 	// products service
-	router.HandlerFunc(http.MethodGet, "/v1/products", productHandler.List)
-	router.HandlerFunc(http.MethodPost, "/v1/products", app.authenticate(app.authorize(utils.Roles["admin"])(productHandler.Create)))
+	router.HandlerFunc(http.MethodGet, "/api/v1/products", productHandler.List)
+	router.HandlerFunc(http.MethodPost, "/api/v1/products", app.authenticate(app.authorize(utils.Roles["admin"])(productHandler.Create)))
 
 	// contracts service
-	router.HandlerFunc(http.MethodPost, "/v1/kontrak", app.authenticate(app.authorize(utils.Roles["consumer"])(contractHandler.BuatKontrak)))
-	router.HandlerFunc(http.MethodGet, "/v1/kontrak", app.authenticate(contractHandler.ListKontrak))
-	router.HandlerFunc(http.MethodPatch, "/v1/kontrak/:nomor_kontrak/quote", app.authenticate(app.authorize(utils.Roles["admin"])(contractHandler.QuoteKontrak)))
-	router.HandlerFunc(http.MethodPatch, "/v1/kontrak/:nomor_kontrak/confirm", app.authenticate(app.authorize(utils.Roles["consumer"])(contractHandler.ConfirmKontrak)))
-	router.HandlerFunc(http.MethodPatch, "/v1/kontrak/:nomor_kontrak/cancel", app.authenticate(app.authorize(utils.Roles["consumer"])(contractHandler.CancelKontrak)))
-	router.HandlerFunc(http.MethodPatch, "/v1/kontrak/:nomor_kontrak/activate", app.authenticate(app.authorize(utils.Roles["admin"])(contractHandler.ActivateKontrak)))
-	router.HandlerFunc(http.MethodPatch, "/v1/kontrak/:nomor_kontrak/cicilan", app.authenticate(app.authorize(utils.Roles["consumer"])(contractHandler.CicilKontrak)))
-	router.HandlerFunc(http.MethodGet, "/v1/kontrak/:nomor_kontrak", app.authenticate(contractHandler.DetailKontrak))
+	router.HandlerFunc(http.MethodPost, "/api/v1/kontrak", app.authenticate(app.authorize(utils.Roles["consumer"])(contractHandler.BuatKontrak)))
+	router.HandlerFunc(http.MethodGet, "/api/v1/kontrak", app.authenticate(contractHandler.ListKontrak))
+	router.HandlerFunc(http.MethodPatch, "/api/v1/kontrak/:nomor_kontrak/quote", app.authenticate(app.authorize(utils.Roles["admin"])(contractHandler.QuoteKontrak)))
+	router.HandlerFunc(http.MethodPatch, "/api/v1/kontrak/:nomor_kontrak/confirm", app.authenticate(app.authorize(utils.Roles["consumer"])(contractHandler.ConfirmKontrak)))
+	router.HandlerFunc(http.MethodPatch, "/api/v1/kontrak/:nomor_kontrak/cancel", app.authenticate(app.authorize(utils.Roles["consumer"])(contractHandler.CancelKontrak)))
+	router.HandlerFunc(http.MethodPatch, "/api/v1/kontrak/:nomor_kontrak/activate", app.authenticate(app.authorize(utils.Roles["admin"])(contractHandler.ActivateKontrak)))
+	router.HandlerFunc(http.MethodPatch, "/api/v1/kontrak/:nomor_kontrak/cicilan", app.authenticate(app.authorize(utils.Roles["consumer"])(contractHandler.CicilKontrak)))
+	router.HandlerFunc(http.MethodGet, "/api/v1/kontrak/:nomor_kontrak", app.authenticate(contractHandler.DetailKontrak))
 
 	// installment service
-	router.HandlerFunc(http.MethodPut, "/v1/installments/:id", app.authenticate(installmentHandler.PayInstallment))
+	router.HandlerFunc(http.MethodPut, "/api/v1/installments/:id", app.authenticate(installmentHandler.PayInstallment))
 
 	// dashboard service
-	router.HandlerFunc(http.MethodGet, "/v1/dashboard/consumer", app.authenticate(app.authorize(utils.Roles["consumer"])(dashboardHandler.GetConsumerDashboard)))
+	router.HandlerFunc(http.MethodGet, "/api/v1/dashboard/consumer", app.authenticate(app.authorize(utils.Roles["consumer"])(dashboardHandler.GetConsumerDashboard)))
 
-	router.HandlerFunc(http.MethodPost, "/v1/cicilan/:id/bayar", userHandler.Register)
-	router.HandlerFunc(http.MethodGet, "/v1/transactions", func(w http.ResponseWriter, r *http.Request) {
+	router.HandlerFunc(http.MethodPost, "/api/v1/cicilan/:id/bayar", userHandler.Register)
+	router.HandlerFunc(http.MethodGet, "/api/v1/transactions", func(w http.ResponseWriter, r *http.Request) {
 		name := r.URL.Query().Get("name")
 
 		if name == "" {
@@ -98,7 +98,7 @@ func (app *application) routes() http.Handler {
 		w.Write([]byte(name))
 	})
 
-	router.HandlerFunc(http.MethodPost, "/v1/installments/:nomor_kontrak/generate", app.authenticate(app.authorize(utils.Roles["admin"])(installmentHandler.GenerateInstallment)))
+	router.HandlerFunc(http.MethodPost, "/api/v1/installments/:nomor_kontrak/generate", app.authenticate(app.authorize(utils.Roles["admin"])(installmentHandler.GenerateInstallment)))
 
 	router.NotFound = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if strings.HasPrefix(r.URL.Path, "/assets/") {
@@ -107,7 +107,7 @@ func (app *application) routes() http.Handler {
 		}
 		http.ServeFile(w, r, "./client/dist/index.html")
 	})
-	return app.loggerMiddleware(app.corsMiddleware(router))
+	return app.loggerMiddleware(router)
 }
 
 func index(w http.ResponseWriter, r *http.Request) {
