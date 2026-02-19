@@ -1,7 +1,9 @@
 package main
 
 import (
+	"embed"
 	"fmt"
+	"io/fs"
 	"net/http"
 	"strings"
 
@@ -11,6 +13,9 @@ import (
 	"github.com/skyespirates/sikmatek/internal/usecase"
 	"github.com/skyespirates/sikmatek/internal/utils"
 )
+
+//go:embed dist
+var embeddedFiles embed.FS
 
 func (app *application) routes() http.Handler {
 	router := httprouter.New()
@@ -43,11 +48,26 @@ func (app *application) routes() http.Handler {
 	dashboardHandler := handler.NewDashboardHandler(dashboardUC)
 
 	// serve static files, foto ktp dan selfie bisa diakses di sini
-	router.ServeFiles("/assets/*filepath", http.Dir("client/dist/assets"))
+	// router.ServeFiles("/assets/*filepath", http.Dir("client/dist/assets"))
 	router.ServeFiles("/uploads/*filepath", http.Dir("static/uploads"))
 
-	router.HandlerFunc(http.MethodGet, "/", index)
-	router.HandlerFunc(http.MethodGet, "/healthcheck", healthcheck)
+	// distDir := "./dist"
+
+	// http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+
+	// 	// Try to find requested file
+	// 	path := filepath.Join(distDir, r.URL.Path)
+	// 	_, err := os.Stat(path)
+
+	// 	// If file does not exist → serve index.html (React Router)
+	// 	if os.IsNotExist(err) {
+	// 		http.ServeFile(w, r, filepath.Join(distDir, "index.html"))
+	// 		return
+	// 	}
+
+	// 	fileServer.ServeHTTP(w, r)
+	// })
+	router.HandlerFunc(http.MethodGet, "/api/healthcheck", healthcheck)
 
 	// auth service
 	router.HandlerFunc(http.MethodPost, "/api/v1/auth/register", userHandler.Register)
@@ -101,19 +121,40 @@ func (app *application) routes() http.Handler {
 	router.HandlerFunc(http.MethodPost, "/api/v1/installments/:nomor_kontrak/generate", app.authenticate(app.authorize(utils.Roles["admin"])(installmentHandler.GenerateInstallment)))
 
 	router.NotFound = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if strings.HasPrefix(r.URL.Path, "/assets/") {
-			http.NotFound(w, r)
+		if strings.HasPrefix(r.URL.Path, "/api/") {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusNotFound)
+			w.Write([]byte(`{"error": "endpoint not found"}`))
 			return
 		}
-		http.ServeFile(w, r, "./client/dist/index.html")
-	})
-	return app.loggerMiddleware(router)
-}
 
-func index(w http.ResponseWriter, r *http.Request) {
-	http.ServeFile(w, r, "./client/dist/index.html")
+		serveReactApp(w, r)
+	})
+
+	return app.loggerMiddleware(router)
 }
 
 func healthcheck(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("All iz well 👌"))
+}
+
+func serveReactApp(w http.ResponseWriter, r *http.Request) {
+	distFS, _ := fs.Sub(embeddedFiles, "dist")
+	fileServer := http.FileServer(http.FS(distFS))
+
+	filePath := strings.TrimPrefix(r.URL.Path, "/")
+	f, err := distFS.Open(filePath)
+	if err == nil {
+		f.Close()
+		fileServer.ServeHTTP(w, r)
+		return
+	}
+
+	index, err := embeddedFiles.ReadFile("dist/index.html")
+	if err != nil {
+		http.Error(w, "index.html not found", http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "text/html")
+	w.Write(index)
 }

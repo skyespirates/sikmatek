@@ -1,5 +1,23 @@
 migrations_path=./migrations
 dsn="mysql://root:secret@tcp(localhost:3306)/sikmatek"
+binary_name=app
+
+start:
+	.\app.exe
+
+build: 	build-react build-go
+	
+build-react:
+	cd ./client && npm.cmd run build
+	mv ./client/dist ./cmd/
+
+build-go:
+	go build -o $(binary_name).exe ./cmd/.
+
+clean:
+	rm -f $(binary_name).exe
+	rm -rf ./cmd/dist
+
 
 .PHONY: api/start
 api/start:

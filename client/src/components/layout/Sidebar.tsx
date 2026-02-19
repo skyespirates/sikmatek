@@ -1,12 +1,5 @@
-import { NavLink, Link } from "react-router-dom";
-import {
-  LayoutDashboard,
-  Gauge,
-  FileText,
-  Menu,
-  X,
-  Rocket,
-} from "lucide-react";
+import { NavLink } from "react-router-dom";
+import { LayoutDashboard, Gauge, FileText, Menu, Rocket } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
