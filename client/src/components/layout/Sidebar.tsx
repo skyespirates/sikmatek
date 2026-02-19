@@ -9,6 +9,7 @@ const Sidebar = ({ className }: { className: string }) => {
     { name: "Dashboard", path: "/", icon: LayoutDashboard },
     { name: "Limits", path: "/limits", icon: Gauge },
     { name: "Contracts", path: "/contracts", icon: FileText },
+    { name: "Products", path: "/products", icon: FileText },
   ];
 
   const NavContent = () => (

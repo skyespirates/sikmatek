@@ -85,9 +85,10 @@ func (app *application) routes() http.Handler {
 	router.HandlerFunc(http.MethodPost, "/api/v1/pengajuan-limit", app.authenticate(app.authorize(utils.Roles["consumer"])(limitHandler.Pengajuan)))
 	router.HandlerFunc(http.MethodPatch, "/api/v1/pengajuan-limit/:limit_id/approve", app.authenticate(app.authorize(utils.Roles["admin"])(limitHandler.Approve)))
 	router.HandlerFunc(http.MethodPatch, "/api/v1/pengajuan-limit/:limit_id/reject", app.authenticate(app.authorize(utils.Roles["admin"])(limitHandler.Reject)))
+	router.HandlerFunc(http.MethodGet, "/api/v1/limits/approved", app.authenticate(app.authorize(utils.Roles["admin"], utils.Roles["consumer"])(limitHandler.ListApproved)))
 
 	// products service
-	router.HandlerFunc(http.MethodGet, "/api/v1/products", productHandler.List)
+	router.HandlerFunc(http.MethodGet, "/api/v1/products", app.authenticate(app.authorize(utils.Roles["admin"], utils.Roles["consumer"])(productHandler.List)))
 	router.HandlerFunc(http.MethodPost, "/api/v1/products", app.authenticate(app.authorize(utils.Roles["admin"])(productHandler.Create)))
 
 	// contracts service

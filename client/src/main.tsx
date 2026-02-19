@@ -12,6 +12,7 @@ import NotFound from "./pages/NotFound";
 import Dashboard from "./pages/Dashboard";
 import Limits from "@/pages/Limit";
 import Contracts from "@/pages/Contract";
+import Products from "./pages/Products";
 
 export const queryClient = new QueryClient({
   defaultOptions: {
@@ -32,6 +33,7 @@ createRoot(document.getElementById("root")!).render(
             <Route index element={<Dashboard />} />
             <Route path="limits" element={<Limits />} />
             <Route path="contracts" element={<Contracts />} />
+            <Route path="products" element={<Products />} />
           </Route>
           <Route element={<PublicRoute />}>
             <Route path="register" element={<Register />} />

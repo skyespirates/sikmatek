@@ -3,17 +3,21 @@ package usecase
 import (
 	"context"
 	"database/sql"
+	"strconv"
 	"time"
 
 	"github.com/skyespirates/sikmatek/internal/entity"
 	"github.com/skyespirates/sikmatek/internal/repository"
 	"github.com/skyespirates/sikmatek/internal/utils"
+	"golang.org/x/text/language"
+	"golang.org/x/text/message"
 )
 
 type LimitUsecase interface {
 	GetList(context.Context) ([]*entity.LimitDetail, error)
 	AjukanLimit(context.Context, int) (int64, error)
 	TindakLanjut(context.Context, entity.UpdateLimitPayload) error
+	ListLimitAktif(context.Context) ([]*entity.ApprovedLimit, error)
 }
 
 type limitUsecase struct {
@@ -108,5 +112,32 @@ func (uc *limitUsecase) TindakLanjut(ctx context.Context, payload entity.UpdateL
 	}
 
 	return nil
+
+}
+
+func (uc *limitUsecase) ListLimitAktif(ctx context.Context) ([]*entity.ApprovedLimit, error) {
+
+	claims := utils.ContextGetUser(ctx)
+
+	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
+	defer cancel()
+
+	limits, err := uc.repo.GetActiveLimit(ctx, uc.db, claims.ConsumerId)
+	if err != nil {
+		return nil, err
+	}
+
+	p := message.NewPrinter(language.Indonesian)
+
+	var l []*entity.ApprovedLimit
+	for _, v := range limits {
+		var temp entity.ApprovedLimit
+		temp.Value = strconv.Itoa(v.Id)
+		temp.Label = p.Sprintf("%d", v.Requested)
+
+		l = append(l, &temp)
+	}
+
+	return l, nil
 
 }

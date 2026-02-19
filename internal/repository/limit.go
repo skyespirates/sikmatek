@@ -11,4 +11,5 @@ type LimitRepository interface {
 	UpdateStatus(context.Context, QueryExecutor, entity.UpdateLimitPayload) error
 	GetLimitById(context.Context, QueryExecutor, int) (*entity.Limit, error)
 	GetLimitList(context.Context, QueryExecutor, entity.LimitListPayload) ([]*entity.LimitDetail, error)
+	GetActiveLimit(context.Context, QueryExecutor, int) ([]*entity.Limit, error)
 }

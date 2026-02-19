@@ -3,6 +3,7 @@ package mysql
 import (
 	"context"
 	"errors"
+	"log"
 
 	"github.com/skyespirates/sikmatek/internal/entity"
 	"github.com/skyespirates/sikmatek/internal/repository"
@@ -58,6 +59,8 @@ func (r *limitRepository) UpdateStatus(ctx context.Context, exec repository.Quer
 }
 
 func (r *limitRepository) GetLimitById(ctx context.Context, exec repository.QueryExecutor, id int) (*entity.Limit, error) {
+
+	log.Println("*****************", id)
 
 	var l entity.Limit
 
@@ -121,6 +124,32 @@ func (r *limitRepository) GetLimitList(ctx context.Context, exec repository.Quer
 
 		limits = append(limits, &l)
 
+	}
+
+	return limits, nil
+
+}
+
+func (r *limitRepository) GetActiveLimit(ctx context.Context, exec repository.QueryExecutor, consumer_id int) ([]*entity.Limit, error) {
+
+	query := `SELECT  id, requested_limit, status, approved_by, approved_at, consumer_id FROM credit_limits WHERE status = 'APPROVED' AND consumer_id = ?`
+
+	rows, err := exec.QueryContext(ctx, query, consumer_id)
+	if err != nil {
+		return nil, err
+	}
+
+	var limits []*entity.Limit
+
+	for rows.Next() {
+		var l entity.Limit
+
+		err = rows.Scan(&l.Id, &l.Requested, &l.Status, &l.ApprovedBy, &l.ApprovedAt, &l.ConsumerId)
+		if err != nil {
+			return nil, err
+		}
+
+		limits = append(limits, &l)
 	}
 
 	return limits, nil

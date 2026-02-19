@@ -10,9 +10,7 @@ require (
 	github.com/julienschmidt/httprouter v1.3.0
 	github.com/lib/pq v1.10.9
 	golang.org/x/crypto v0.47.0
+	golang.org/x/text v0.33.0
 )
 
-require (
-	filippo.io/edwards25519 v1.1.0 // indirect
-	golang.org/x/sync v0.19.0 // indirect
-)
+require filippo.io/edwards25519 v1.1.0 // indirect

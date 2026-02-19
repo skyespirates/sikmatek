@@ -138,3 +138,19 @@ func (h *limitHandler) Reject(w http.ResponseWriter, r *http.Request) {
 func (h *limitHandler) Check(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("check limit"))
 }
+
+func (h *limitHandler) ListApproved(w http.ResponseWriter, r *http.Request) {
+
+	limits, err := h.uc.ListLimitAktif(r.Context())
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	resp := map[string]any{}
+	resp["limits"] = limits
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(resp)
+
+}

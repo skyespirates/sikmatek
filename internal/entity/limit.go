@@ -35,3 +35,8 @@ type LimitListPayload struct {
 	RoleId     int
 	ConsumerId int
 }
+
+type ApprovedLimit struct {
+	Label string `json:"label"`
+	Value string `json:"value"`
+}

@@ -4,6 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
+	"log"
 	"time"
 
 	"github.com/skyespirates/sikmatek/internal/entity"
@@ -42,6 +44,8 @@ func NewContractUsecase(db *sql.DB, cr repository.ContractRepository, lr reposit
 
 func (uc *contractUsecase) Create(ctx context.Context, payload entity.CreateContractPayload) (string, error) {
 
+	log.Printf("############ %+v", payload)
+
 	ctx, cancel := context.WithTimeout(ctx, 4*time.Second)
 	defer cancel()
 
@@ -62,7 +66,7 @@ func (uc *contractUsecase) Create(ctx context.Context, payload entity.CreateCont
 	// check apakah limit yg diinput sudah diapprove
 	limit, err := uc.lr.GetLimitById(ctx, tx, payload.LimitId)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("error get limit by id %w", err)
 	}
 
 	if limit.Status != "APPROVED" {
@@ -71,7 +75,7 @@ func (uc *contractUsecase) Create(ctx context.Context, payload entity.CreateCont
 
 	product, err := uc.pr.GetProductById(ctx, tx, payload.ProductId)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("error get product by id %w", err)
 	}
 
 	if limit.Requested < product.Harga {
@@ -84,7 +88,7 @@ func (uc *contractUsecase) Create(ctx context.Context, payload entity.CreateCont
 	// buat kontrak
 	nomor_kontrak, err := uc.cr.Create(ctx, tx, payload)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("error on create contract %w", err)
 	}
 
 	err = tx.Commit()

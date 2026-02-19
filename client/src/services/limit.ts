@@ -11,3 +11,8 @@ export async function createLimit(requested_limit: number) {
   });
   return data;
 }
+
+export async function getApprovedLimits() {
+  const { data } = await api.get("/api/v1/limits/approved");
+  return data.limits;
+}

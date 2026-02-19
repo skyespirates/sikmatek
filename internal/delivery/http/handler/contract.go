@@ -32,8 +32,11 @@ func (h *contractHandler) BuatKontrak(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	log.Printf("@@@@@@@@@@@@@@@ %+v", payload)
+
 	nomor_kontrak, err := h.uc.Create(r.Context(), payload)
 	if err != nil {
+		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -42,9 +45,6 @@ func (h *contractHandler) BuatKontrak(w http.ResponseWriter, r *http.Request) {
 
 	resp["nomor_kontrak"] = nomor_kontrak
 
-	resource := fmt.Sprintf("/v1/kontrak/%s", nomor_kontrak)
-	w.Header().Set("Location", resource)
-	w.WriteHeader(http.StatusCreated)
 	utils.JSONResponse(w, "berhasil membuat kontrak", resp)
 }
 
