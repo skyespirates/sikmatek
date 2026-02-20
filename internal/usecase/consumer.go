@@ -3,6 +3,7 @@ package usecase
 import (
 	"context"
 	"database/sql"
+	"log"
 	"strconv"
 	"time"
 
@@ -12,6 +13,7 @@ import (
 )
 
 type ConsumerUsecase interface {
+	GetInfo(context.Context) (*entity.Consumer, error)
 	CompleteInfo(context.Context, entity.UpdateConsumerPayload) error
 	SetKtp(context.Context, int, string) error
 	SetSelfie(context.Context, int, string) error
@@ -30,10 +32,28 @@ func NewConsumerUsecase(db *sql.DB, cr repository.ConsumerRepository) ConsumerUs
 	}
 }
 
+func (uc *consumerUsecase) GetInfo(ctx context.Context) (*entity.Consumer, error) {
+
+	claims := utils.ContextGetUser(ctx)
+
+	ctx, cancel := context.WithTimeout(ctx, 2*time.Second)
+	defer cancel()
+
+	consumer, err := uc.cr.GetByUserId(ctx, uc.db, claims.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	return consumer, nil
+
+}
+
 func (uc *consumerUsecase) CompleteInfo(ctx context.Context, payload entity.UpdateConsumerPayload) error {
 
 	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
 	defer cancel()
+
+	log.Println(payload.TanggalLahir)
 
 	// retrieve consumer info from context
 	claims := utils.ContextGetUser(ctx)

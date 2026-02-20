@@ -23,6 +23,7 @@ import { Button } from "@/components/ui/button";
 import { useMutation } from "@tanstack/react-query";
 import { approveLimit, rejectLimit } from "@/services/limit";
 import { queryClient } from "@/main";
+import { toast } from "sonner";
 
 type Limit = {
   id: number;
@@ -38,14 +39,14 @@ export function LimitTable({ limits }: { limits: Limit[] }) {
     mutationFn: approveLimit,
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["limits"] });
-      alert(data.message);
+      toast(data.message, { position: "top-right", closeButton: true });
     },
   });
   const rejectMutation = useMutation({
     mutationFn: rejectLimit,
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["limits"] });
-      alert(data.message);
+      toast(data.message, { position: "top-right", closeButton: true });
     },
   });
   return (

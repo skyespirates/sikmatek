@@ -10,8 +10,8 @@ type Consumer struct {
 	TempatLahir  string    `json:"tempat_lahir"`
 	TanggalLahir time.Time `json:"tanggal_lahir"`
 	Gaji         int       `json:"gaji"`
-	FotoKtp      string    `json:"foto_ktp"`
-	FotoSelfie   string    `json:"foto_selfie"`
+	FotoKtp      *string   `json:"foto_ktp"`
+	FotoSelfie   *string   `json:"foto_selfie"`
 	IsVerified   bool      `json:"is_verified"`
 	UserId       int       `json:"user_id"`
 }

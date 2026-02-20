@@ -13,6 +13,7 @@ import Dashboard from "./pages/Dashboard";
 import Limits from "@/pages/Limit";
 import Contracts from "@/pages/Contract";
 import Products from "./pages/Products";
+import Profile from "./pages/Profile";
 
 export const queryClient = new QueryClient({
   defaultOptions: {
@@ -34,6 +35,7 @@ createRoot(document.getElementById("root")!).render(
             <Route path="limits" element={<Limits />} />
             <Route path="contracts" element={<Contracts />} />
             <Route path="products" element={<Products />} />
+            <Route path="profile" element={<Profile />} />
           </Route>
           <Route element={<PublicRoute />}>
             <Route path="register" element={<Register />} />

@@ -28,6 +28,18 @@ func NewConsumerHandler(uc usecase.ConsumerUsecase) *consumerHandler {
 	}
 }
 
+func (h *consumerHandler) GetConsumerInfo(w http.ResponseWriter, r *http.Request) {
+
+	info, err := h.uc.GetInfo(r.Context())
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	utils.JSONResponse(w, "get profile", info)
+
+}
+
 func (h *consumerHandler) CompleteConsumerInfo(w http.ResponseWriter, r *http.Request) {
 	var payload entity.UpdateConsumerPayload
 
@@ -49,13 +61,7 @@ func (h *consumerHandler) CompleteConsumerInfo(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	resp := map[string]any{}
-	resp["message"] = "consumer info updated successfully"
-
-	err = json.NewEncoder(w).Encode(resp)
-	if err != nil {
-		http.Error(w, "error on encoding json", http.StatusInternalServerError)
-	}
+	utils.JSONResponse(w, "profile has been updated", nil)
 
 }
 func (h *consumerHandler) UploadKtp(w http.ResponseWriter, r *http.Request) {
@@ -100,7 +106,7 @@ func (h *consumerHandler) UploadKtp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Fprintf(w, "ktp image uploaded successfully")
+	utils.JSONResponse(w, "KTP has been uploaded", nil)
 }
 func (h *consumerHandler) UploadSelfie(w http.ResponseWriter, r *http.Request) {
 
@@ -144,7 +150,7 @@ func (h *consumerHandler) UploadSelfie(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Fprintf(w, "selfie image uploaded successfully")
+	utils.JSONResponse(w, "Selfie has been uploaded", nil)
 
 }
 

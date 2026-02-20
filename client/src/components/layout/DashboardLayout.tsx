@@ -1,6 +1,7 @@
 import { Outlet } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import Header from "./Header";
+import { Toaster } from "@/components/ui/sonner";
 
 const DashboardLayout = () => {
   return (
@@ -13,6 +14,7 @@ const DashboardLayout = () => {
             <Outlet />
           </div>
         </main>
+        <Toaster />
       </div>
     </div>
   );

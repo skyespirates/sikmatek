@@ -74,6 +74,7 @@ func (app *application) routes() http.Handler {
 	router.HandlerFunc(http.MethodPost, "/api/v1/auth/login", userHandler.Login)
 
 	// consumers service
+	router.HandlerFunc(http.MethodGet, "/api/v1/consumers", app.authenticate(app.authorize(utils.Roles["admin"], utils.Roles["consumer"])(consumerHandler.GetConsumerInfo)))
 	router.HandlerFunc(http.MethodPut, "/api/v1/consumers", app.authenticate(app.authorize(utils.Roles["consumer"])(consumerHandler.CompleteConsumerInfo)))
 	router.HandlerFunc(http.MethodPut, "/api/v1/consumers/upload-ktp", app.authenticate(app.authorize(utils.Roles["consumer"])(consumerHandler.UploadKtp)))
 	router.HandlerFunc(http.MethodPut, "/api/v1/consumers/upload-selfie", app.authenticate(app.authorize(utils.Roles["consumer"])(consumerHandler.UploadSelfie)))

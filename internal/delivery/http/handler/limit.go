@@ -91,7 +91,7 @@ func (h *limitHandler) Approve(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	utils.JSONResponse(w, "limit is approved", nil)
+	utils.JSONResponse(w, "limit has been approved", nil)
 }
 
 func (h *limitHandler) Reject(w http.ResponseWriter, r *http.Request) {
@@ -118,7 +118,7 @@ func (h *limitHandler) Reject(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	utils.JSONResponse(w, "limit is rejected", nil)
+	utils.JSONResponse(w, "limit has been rejected", nil)
 
 }
 
