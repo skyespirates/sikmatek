@@ -11,6 +11,18 @@ import { Badge } from "./ui/badge";
 import { formatNominal } from "@/lib/utils";
 import { Card, CardContent } from "./ui/card";
 import Dialog from "./Dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { MoreHorizontalIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useMutation } from "@tanstack/react-query";
+import { approveLimit, rejectLimit } from "@/services/limit";
+import { queryClient } from "@/main";
 
 type Limit = {
   id: number;
@@ -22,6 +34,20 @@ type Limit = {
 };
 
 export function LimitTable({ limits }: { limits: Limit[] }) {
+  const approveMutation = useMutation({
+    mutationFn: approveLimit,
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["limits"] });
+      alert(data.message);
+    },
+  });
+  const rejectMutation = useMutation({
+    mutationFn: rejectLimit,
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["limits"] });
+      alert(data.message);
+    },
+  });
   return (
     <Card>
       <CardContent>
@@ -35,6 +61,7 @@ export function LimitTable({ limits }: { limits: Limit[] }) {
               <TableHead>Used</TableHead>
               <TableHead>Remaining</TableHead>
               <TableHead>Status</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -48,6 +75,38 @@ export function LimitTable({ limits }: { limits: Limit[] }) {
                   <Badge className={`${status[limit.status as statusKey]}`}>
                     {limit.status.toLowerCase()}
                   </Badge>
+                </TableCell>
+                <TableCell className="text-right">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="size-8 cursor-pointer"
+                      >
+                        <MoreHorizontalIcon />
+                        <span className="sr-only">Open menu</span>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem
+                        className="cursor-pointer"
+                        onClick={() => approveMutation.mutate(limit.id)}
+                      >
+                        Approve
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        className="cursor-pointer"
+                        onClick={() => rejectMutation.mutate(limit.id)}
+                      >
+                        Reject
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem variant="destructive">
+                        Delete
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </TableCell>
               </TableRow>
             ))}

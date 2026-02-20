@@ -10,6 +10,23 @@ import {
 import { Badge } from "./ui/badge";
 import { formatNominal } from "@/lib/utils";
 import { Card, CardContent } from "./ui/card";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { MoreHorizontalIcon } from "lucide-react";
+import { useMutation } from "@tanstack/react-query";
+import {
+  activateKontrak,
+  cancelKontrak,
+  confirmKontrak,
+  quoteKontrak,
+} from "@/services/contract";
+import { queryClient } from "@/main";
 
 type Contract = {
   nomor_kontrak: string;
@@ -25,6 +42,34 @@ type Contract = {
 };
 
 export function ContractTable({ contracts }: { contracts: Contract[] }) {
+  const quoteMutation = useMutation({
+    mutationFn: quoteKontrak,
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["kontrak"] });
+      alert(data.message);
+    },
+  });
+  const confirmMutation = useMutation({
+    mutationFn: confirmKontrak,
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["kontrak"] });
+      alert(data.message);
+    },
+  });
+  const cancelMutation = useMutation({
+    mutationFn: cancelKontrak,
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["kontrak"] });
+      alert(data.message);
+    },
+  });
+  const activateMutation = useMutation({
+    mutationFn: activateKontrak,
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["kontrak"] });
+      alert(data.message);
+    },
+  });
   return (
     <Card>
       <CardContent>
@@ -39,6 +84,7 @@ export function ContractTable({ contracts }: { contracts: Contract[] }) {
               <TableHead>Tenor (Bulan)</TableHead>
               <TableHead>Total Pembiayaan (Rp)</TableHead>
               <TableHead>Status</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -58,6 +104,58 @@ export function ContractTable({ contracts }: { contracts: Contract[] }) {
                   <Badge className={`${status[contract.status as statusKey]}`}>
                     {contract.status.toLowerCase()}
                   </Badge>
+                </TableCell>
+                <TableCell className="text-right">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="size-8 cursor-pointer"
+                      >
+                        <MoreHorizontalIcon />
+                        <span className="sr-only">Open menu</span>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem
+                        className="cursor-pointer"
+                        onClick={() =>
+                          quoteMutation.mutate(contract.nomor_kontrak)
+                        }
+                      >
+                        Quote
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        className="cursor-pointer"
+                        onClick={() =>
+                          confirmMutation.mutate(contract.nomor_kontrak)
+                        }
+                      >
+                        Confirm
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        className="cursor-pointer"
+                        onClick={() =>
+                          cancelMutation.mutate(contract.nomor_kontrak)
+                        }
+                      >
+                        Cancel
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        className="cursor-pointer"
+                        onClick={() =>
+                          activateMutation.mutate(contract.nomor_kontrak)
+                        }
+                      >
+                        Activate
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem variant="destructive">
+                        Delete
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </TableCell>
               </TableRow>
             ))}

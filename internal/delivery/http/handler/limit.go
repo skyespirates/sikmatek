@@ -91,14 +91,7 @@ func (h *limitHandler) Approve(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resp := map[string]any{}
-	resp["message"] = "limit approved"
-
-	err = json.NewEncoder(w).Encode(resp)
-	if err != nil {
-		http.Error(w, "error on encoding", http.StatusInternalServerError)
-	}
-
+	utils.JSONResponse(w, "limit is approved", nil)
 }
 
 func (h *limitHandler) Reject(w http.ResponseWriter, r *http.Request) {
@@ -125,13 +118,7 @@ func (h *limitHandler) Reject(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resp := map[string]any{}
-	resp["message"] = "limit rejected'"
-
-	err = json.NewEncoder(w).Encode(resp)
-	if err != nil {
-		http.Error(w, "error on encoding", http.StatusInternalServerError)
-	}
+	utils.JSONResponse(w, "limit is rejected", nil)
 
 }
 

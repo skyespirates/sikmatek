@@ -17,3 +17,27 @@ export async function buatKontrak(payload: KontrakData) {
 
   return data.data.nomor_kontrak;
 }
+
+export async function quoteKontrak(kontrak_id: string) {
+  const { data } = await api.patch(`/api/v1/kontrak/${kontrak_id}/quote`);
+
+  return data;
+}
+
+export async function confirmKontrak(kontrak_id: string) {
+  const { data } = await api.patch(`/api/v1/kontrak/${kontrak_id}/confirm`);
+
+  return data;
+}
+
+export async function cancelKontrak(kontrak_id: string) {
+  const { data } = await api.patch(`/api/v1/kontrak/${kontrak_id}/cancel`);
+
+  return data;
+}
+
+export async function activateKontrak(kontrak_id: string) {
+  const { data } = await api.patch(`/api/v1/kontrak/${kontrak_id}/activate`);
+
+  return data;
+}

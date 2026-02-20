@@ -2,7 +2,6 @@ package handler
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 
@@ -31,8 +30,6 @@ func (h *contractHandler) BuatKontrak(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "bad request", http.StatusBadRequest)
 		return
 	}
-
-	log.Printf("@@@@@@@@@@@@@@@ %+v", payload)
 
 	nomor_kontrak, err := h.uc.Create(r.Context(), payload)
 	if err != nil {
@@ -73,7 +70,10 @@ func (h *contractHandler) QuoteKontrak(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Fprintf(w, "contract %s has quoted", nomor_kontrak)
+	resp := map[string]any{}
+	resp["nomor_kontrak"] = nomor_kontrak
+
+	utils.JSONResponse(w, "quoted successfully", resp)
 
 }
 
@@ -88,8 +88,10 @@ func (h *contractHandler) ConfirmKontrak(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	fmt.Fprintf(w, "contract %s has confirmed", nomor_kontrak)
-	w.WriteHeader(http.StatusNoContent)
+	resp := map[string]any{}
+	resp["nomor_kontrak"] = nomor_kontrak
+
+	utils.JSONResponse(w, "contract is confirmed", resp)
 
 }
 
@@ -98,14 +100,16 @@ func (h *contractHandler) CancelKontrak(w http.ResponseWriter, r *http.Request) 
 	ps := httprouter.ParamsFromContext(r.Context())
 	nomor_kontrak := ps.ByName("nomor_kontrak")
 
-	err := h.uc.Confirm(r.Context(), nomor_kontrak)
+	err := h.uc.Cancel(r.Context(), nomor_kontrak)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	fmt.Fprintf(w, "contract %s has cancelled", nomor_kontrak)
-	w.WriteHeader(http.StatusNoContent)
+	resp := map[string]any{}
+	resp["nomor_kontrak"] = nomor_kontrak
+
+	utils.JSONResponse(w, "contract is cancelled", resp)
 
 }
 
@@ -120,8 +124,10 @@ func (h *contractHandler) ActivateKontrak(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	w.WriteHeader(http.StatusNoContent)
-	fmt.Fprintf(w, "contract %s has activated", nomor_kontrak)
+	resp := map[string]any{}
+	resp["nomor_kontrak"] = nomor_kontrak
+
+	utils.JSONResponse(w, "activated successfully", resp)
 
 }
 
