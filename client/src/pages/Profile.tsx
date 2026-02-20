@@ -318,6 +318,15 @@ const Profile = () => {
                 <Save />
               </Button>
             </div>
+            {data?.foto_ktp && (
+              <a
+                href={data.foto_ktp}
+                target="_blank"
+                className="text-sm text-purple-400 hover:underline"
+              >
+                lihat foto ktp
+              </a>
+            )}
           </Field>
           <Field className="w-72">
             <FieldLabel htmlFor="selfie">Upload Selfie</FieldLabel>
@@ -335,6 +344,15 @@ const Profile = () => {
                 <Save />
               </Button>
             </div>
+            {data?.foto_selfie && (
+              <a
+                href={data.foto_selfie}
+                target="_blank"
+                className="text-sm text-purple-400 hover:underline"
+              >
+                lihat foto selfie
+              </a>
+            )}
           </Field>
         </CardContent>
       </Card>

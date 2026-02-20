@@ -4,13 +4,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"log"
 	"net/http"
-	"os"
-	"path/filepath"
-	"strings"
 
+	"github.com/cloudinary/cloudinary-go/v2"
+	"github.com/cloudinary/cloudinary-go/v2/api/uploader"
 	"github.com/julienschmidt/httprouter"
 	"github.com/skyespirates/sikmatek/internal/entity"
 	"github.com/skyespirates/sikmatek/internal/infra/mysql"
@@ -20,11 +18,13 @@ import (
 
 type consumerHandler struct {
 	uc usecase.ConsumerUsecase
+	c  *cloudinary.Cloudinary
 }
 
-func NewConsumerHandler(uc usecase.ConsumerUsecase) *consumerHandler {
+func NewConsumerHandler(uc usecase.ConsumerUsecase, c *cloudinary.Cloudinary) *consumerHandler {
 	return &consumerHandler{
 		uc: uc,
+		c:  c,
 	}
 }
 
@@ -74,32 +74,38 @@ func (h *consumerHandler) UploadKtp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	file, handler, err := r.FormFile("image")
+	file, _, err := r.FormFile("image")
 	if err != nil {
 		http.Error(w, "error retrieving the file", http.StatusBadRequest)
 		return
 	}
 	defer file.Close()
 
-	safeName := strings.ReplaceAll(handler.Filename, " ", "_")
-	filePath := filepath.Join("static", "uploads", "ktp", safeName)
-	dst, err := os.Create(filePath)
-	if err != nil {
-		log.Printf("error: %s", err.Error())
-		http.Error(w, "error on create destination", http.StatusInternalServerError)
-		return
-	}
-	defer dst.Close()
-
-	_, err = io.Copy(dst, file)
+	result, err := h.c.Upload.Upload(r.Context(), file, uploader.UploadParams{})
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
+	// safeName := strings.ReplaceAll(handler.Filename, " ", "_")
+	// filePath := filepath.Join("static", "uploads", "ktp", safeName)
+	// dst, err := os.Create(filePath)
+	// if err != nil {
+	// 	log.Printf("error: %s", err.Error())
+	// 	http.Error(w, "error on create destination", http.StatusInternalServerError)
+	// 	return
+	// }
+	// defer dst.Close()
+
+	// _, err = io.Copy(dst, file)
+	// if err != nil {
+	// 	http.Error(w, err.Error(), http.StatusInternalServerError)
+	// 	return
+	// }
+
 	claims := utils.ContextGetUser(r.Context())
 
-	err = h.uc.SetKtp(r.Context(), claims.ConsumerId, filePath)
+	err = h.uc.SetKtp(r.Context(), claims.ConsumerId, result.URL)
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, "internal server error", http.StatusInternalServerError)
@@ -118,32 +124,38 @@ func (h *consumerHandler) UploadSelfie(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	file, handler, err := r.FormFile("image")
+	file, _, err := r.FormFile("image")
 	if err != nil {
 		http.Error(w, "error retrieving the file", http.StatusBadRequest)
 		return
 	}
 	defer file.Close()
 
-	safeName := strings.ReplaceAll(handler.Filename, " ", "_")
-	filePath := filepath.Join("static", "uploads", "selfie", safeName)
-	dst, err := os.Create(filePath)
-	if err != nil {
-		log.Printf("error: %s", err.Error())
-		http.Error(w, "error on create destination", http.StatusInternalServerError)
-		return
-	}
-	defer dst.Close()
-
-	_, err = io.Copy(dst, file)
+	result, err := h.c.Upload.Upload(r.Context(), file, uploader.UploadParams{})
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
+	// safeName := strings.ReplaceAll(handler.Filename, " ", "_")
+	// filePath := filepath.Join("static", "uploads", "selfie", safeName)
+	// dst, err := os.Create(filePath)
+	// if err != nil {
+	// 	log.Printf("error: %s", err.Error())
+	// 	http.Error(w, "error on create destination", http.StatusInternalServerError)
+	// 	return
+	// }
+	// defer dst.Close()
+
+	// _, err = io.Copy(dst, file)
+	// if err != nil {
+	// 	http.Error(w, err.Error(), http.StatusInternalServerError)
+	// 	return
+	// }
+
 	claims := utils.ContextGetUser(r.Context())
 
-	err = h.uc.SetSelfie(r.Context(), claims.ConsumerId, filePath)
+	err = h.uc.SetSelfie(r.Context(), claims.ConsumerId, result.URL)
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, "internal server error", http.StatusInternalServerError)

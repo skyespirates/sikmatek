@@ -40,7 +40,7 @@ func (app *application) routes() http.Handler {
 
 	// handlers
 	userHandler := handler.NewUserHandler(userUC)
-	consumerHandler := handler.NewConsumerHandler(consumerUC)
+	consumerHandler := handler.NewConsumerHandler(consumerUC, app.c)
 	limitHandler := handler.NewLimitHandler(limitUC)
 	contractHandler := handler.NewContractHandler(contractUC)
 	productHandler := handler.NewProductHandler(productUC)
@@ -51,22 +51,6 @@ func (app *application) routes() http.Handler {
 	// router.ServeFiles("/assets/*filepath", http.Dir("client/dist/assets"))
 	router.ServeFiles("/uploads/*filepath", http.Dir("static/uploads"))
 
-	// distDir := "./dist"
-
-	// http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-
-	// 	// Try to find requested file
-	// 	path := filepath.Join(distDir, r.URL.Path)
-	// 	_, err := os.Stat(path)
-
-	// 	// If file does not exist → serve index.html (React Router)
-	// 	if os.IsNotExist(err) {
-	// 		http.ServeFile(w, r, filepath.Join(distDir, "index.html"))
-	// 		return
-	// 	}
-
-	// 	fileServer.ServeHTTP(w, r)
-	// })
 	router.HandlerFunc(http.MethodGet, "/api/healthcheck", healthcheck)
 
 	// auth service
