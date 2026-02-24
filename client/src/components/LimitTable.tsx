@@ -33,8 +33,16 @@ type Limit = {
   status: string;
   consumer_id: number;
 };
+import { useState } from "react";
 
 export function LimitTable({ limits }: { limits: Limit[] }) {
+  const [page, setPage] = useState(1);
+  const pageSize = 4;
+
+  const totalPages = Math.ceil(limits.length / pageSize);
+
+  const paginatedLimits = limits.slice((page - 1) * pageSize, page * pageSize);
+
   const approveMutation = useMutation({
     mutationFn: approveLimit,
     onSuccess: (data) => {
@@ -66,7 +74,7 @@ export function LimitTable({ limits }: { limits: Limit[] }) {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {limits.map((limit) => (
+            {paginatedLimits.map((limit) => (
               <TableRow key={limit.id}>
                 <TableCell className="font-medium">{limit.id}</TableCell>
                 <TableCell>{formatNominal(limit.requested_limit)}</TableCell>
@@ -113,6 +121,31 @@ export function LimitTable({ limits }: { limits: Limit[] }) {
             ))}
           </TableBody>
         </Table>
+        <div className="flex items-center justify-between mt-4">
+          <p className="text-sm text-muted-foreground">
+            Page {page} of {totalPages}
+          </p>
+
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setPage((p) => p - 1)}
+              disabled={page === 1}
+            >
+              Previous
+            </Button>
+
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setPage((p) => p + 1)}
+              disabled={page === totalPages}
+            >
+              Next
+            </Button>
+          </div>
+        </div>
       </CardContent>
     </Card>
   );

@@ -27,6 +27,7 @@ import {
   quoteKontrak,
 } from "@/services/contract";
 import { queryClient } from "@/main";
+import { useState } from "react";
 
 type Contract = {
   nomor_kontrak: string;
@@ -42,6 +43,15 @@ type Contract = {
 };
 
 export function ContractTable({ contracts }: { contracts: Contract[] }) {
+  const [page, setPage] = useState(1);
+  const pageSize = 5;
+
+  const totalPages = Math.ceil(contracts.length / pageSize);
+  const paginatedContracts = contracts.slice(
+    (page - 1) * pageSize,
+    page * pageSize
+  );
+
   const quoteMutation = useMutation({
     mutationFn: quoteKontrak,
     onSuccess: (data) => {
@@ -88,7 +98,7 @@ export function ContractTable({ contracts }: { contracts: Contract[] }) {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {contracts.map((contract) => (
+            {paginatedContracts.map((contract) => (
               <TableRow key={contract.nomor_kontrak}>
                 <TableCell className="font-medium">
                   {contract.nomor_kontrak}
@@ -161,6 +171,31 @@ export function ContractTable({ contracts }: { contracts: Contract[] }) {
             ))}
           </TableBody>
         </Table>
+        <div className="flex items-center justify-between mt-4">
+          <p className="text-sm text-muted-foreground">
+            Page {page} of {totalPages}
+          </p>
+
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setPage((p) => p - 1)}
+              disabled={page === 1}
+            >
+              Previous
+            </Button>
+
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setPage((p) => p + 1)}
+              disabled={page === totalPages}
+            >
+              Next
+            </Button>
+          </div>
+        </div>
       </CardContent>
     </Card>
   );
