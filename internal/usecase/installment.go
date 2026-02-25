@@ -12,6 +12,7 @@ import (
 type InstallmentUsecase interface {
 	GenerateInstallment(context.Context, string) error
 	PayInstallment(context.Context, int) error
+	ListInstallment(context.Context, string) ([]*entity.Installment, error)
 }
 
 type installmentUsecase struct {
@@ -117,5 +118,14 @@ func (uc *installmentUsecase) PayInstallment(ctx context.Context, id int) error 
 	tx.Commit()
 
 	return nil
+
+}
+
+func (uc *installmentUsecase) ListInstallment(ctx context.Context, nomor_kontrak string) ([]*entity.Installment, error) {
+
+	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
+	defer cancel()
+
+	return uc.ir.GetList(ctx, uc.db, nomor_kontrak)
 
 }

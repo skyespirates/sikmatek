@@ -42,18 +42,6 @@ const Sidebar = ({ className }: { className: string }) => {
           </NavLink>
         ))}
       </nav>
-
-      <div className="px-6 mt-auto">
-        <div className="bg-slate-50 rounded-xl p-4 border border-slate-100">
-          <h4 className="font-semibold text-sm mb-1">Upgrade Plan</h4>
-          <p className="text-xs text-muted-foreground mb-3">
-            Unlock more limits.
-          </p>
-          <Button size="sm" className="w-full text-xs" variant="outline">
-            View Plans
-          </Button>
-        </div>
-      </div>
     </div>
   );
 

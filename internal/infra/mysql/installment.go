@@ -85,3 +85,29 @@ func (r *installmentRepository) Pay(ctx context.Context, exec repository.QueryEx
 	return nil
 
 }
+
+func (r *installmentRepository) GetList(ctx context.Context, exec repository.QueryExecutor, nomor_kontrak string) ([]*entity.Installment, error) {
+
+	query := `SELECT id, nomor_kontrak, bulan_ke, jumlah_tagihan, due_date, status, paid_at FROM installments WHERE nomor_kontrak = ?`
+
+	rows, err := exec.QueryContext(ctx, query, nomor_kontrak)
+	if err != nil {
+		return nil, err
+	}
+
+	var installments []*entity.Installment
+	for rows.Next() {
+		var i entity.Installment
+
+		err = rows.Scan(&i.ID, &i.NomorKontrak, &i.BulanKe, &i.JumlahTagihan, &i.DueDate, &i.Status, &i.PaidAt)
+		if err != nil {
+			return nil, err
+		}
+
+		installments = append(installments, &i)
+
+	}
+
+	return installments, nil
+
+}

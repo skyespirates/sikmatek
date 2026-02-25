@@ -3,6 +3,7 @@ package handler
 import (
 	"errors"
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 
@@ -58,5 +59,24 @@ func (h installmentHandler) PayInstallment(w http.ResponseWriter, r *http.Reques
 	}
 
 	utils.JSONResponse(w, "cicilan berhasil dibayar", struct{}{})
+
+}
+
+func (h installmentHandler) ListInstallment(w http.ResponseWriter, r *http.Request) {
+
+	ps := httprouter.ParamsFromContext(r.Context())
+
+	nomor_kontrak := ps.ByName("nomor_kontrak")
+
+	installements, err := h.uc.ListInstallment(r.Context(), nomor_kontrak)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	res := map[string]any{"installments": installements}
+
+	utils.JSONResponse(w, "list intallments", res)
 
 }

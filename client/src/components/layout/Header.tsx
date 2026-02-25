@@ -12,6 +12,8 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { logout, getUser } from "@/lib/auth";
 import { Link } from "react-router";
+import { Badge } from "../ui/badge";
+import { BadgeCheck } from "lucide-react";
 
 const Header = () => {
   const user = getUser();
@@ -29,6 +31,15 @@ const Header = () => {
       </div>
 
       <div className="flex items-center gap-3">
+        {user?.is_verified ? (
+          <Badge variant="secondary">
+            <BadgeCheck data-icon="inline-start" />
+            Verified
+          </Badge>
+        ) : (
+          <Badge>Not Verified</Badge>
+        )}
+
         <Button
           variant="ghost"
           size="icon"

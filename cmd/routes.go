@@ -88,6 +88,7 @@ func (app *application) routes() http.Handler {
 
 	// installment service
 	router.HandlerFunc(http.MethodPut, "/api/v1/installments/:id", app.authenticate(installmentHandler.PayInstallment))
+	router.HandlerFunc(http.MethodGet, "/api/v1/installments/list/:nomor_kontrak", app.authenticate(installmentHandler.ListInstallment))
 
 	// dashboard service
 	router.HandlerFunc(http.MethodGet, "/api/v1/dashboard/consumer", app.authenticate(app.authorize(utils.Roles["consumer"])(dashboardHandler.GetConsumerDashboard)))

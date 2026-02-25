@@ -19,7 +19,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { MoreHorizontalIcon } from "lucide-react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   activateKontrak,
   cancelKontrak,
@@ -28,6 +28,8 @@ import {
 } from "@/services/contract";
 import { queryClient } from "@/main";
 import { useState } from "react";
+import { getInstallmentList } from "@/services/installment";
+import InstallmentModal from "./InstallmentModal";
 
 type Contract = {
   nomor_kontrak: string;
@@ -43,6 +45,9 @@ type Contract = {
 };
 
 export function ContractTable({ contracts }: { contracts: Contract[] }) {
+  const [open, setOpen] = useState(false);
+  const [selectedNomorKontrak, setSelectedNomorKontrak] = useState("");
+
   const [page, setPage] = useState(1);
   const pageSize = 5;
 
@@ -80,6 +85,12 @@ export function ContractTable({ contracts }: { contracts: Contract[] }) {
       alert(data.message);
     },
   });
+  const { isSuccess, data } = useQuery({
+    queryKey: ["installments", selectedNomorKontrak],
+    queryFn: () => getInstallmentList(selectedNomorKontrak!),
+    enabled: !!selectedNomorKontrak,
+  });
+
   return (
     <Card>
       <CardContent>
@@ -160,6 +171,15 @@ export function ContractTable({ contracts }: { contracts: Contract[] }) {
                       >
                         Activate
                       </DropdownMenuItem>
+                      <DropdownMenuItem
+                        className="cursor-pointer"
+                        onClick={() => {
+                          setSelectedNomorKontrak(contract.nomor_kontrak);
+                          setOpen(true);
+                        }}
+                      >
+                        Cicilan
+                      </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem variant="destructive">
                         Delete
@@ -197,6 +217,9 @@ export function ContractTable({ contracts }: { contracts: Contract[] }) {
           </div>
         </div>
       </CardContent>
+      {isSuccess && Array.isArray(data) && (
+        <InstallmentModal open={open} setOpen={setOpen} installments={data} />
+      )}
     </Card>
   );
 }

@@ -10,4 +10,5 @@ type InstallmentRepository interface {
 	CreateN(context.Context, QueryExecutor, entity.CreateInstallmentPayload) error
 	GetInfo(context.Context, QueryExecutor, int) (*entity.InstallmentInfo, error)
 	Pay(context.Context, QueryExecutor, int) error
+	GetList(context.Context, QueryExecutor, string) ([]*entity.Installment, error)
 }
