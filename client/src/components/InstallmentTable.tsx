@@ -8,16 +8,13 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { formatNominal } from "@/lib/utils";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { MoreHorizontalIcon } from "lucide-react";
 import { format } from "date-fns";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { payInstallment } from "@/services/installment";
+import { queryClient } from "@/main";
+import { toast } from "sonner";
+import { Badge } from "./ui/badge";
 
 type Installment = {
   id: number;
@@ -29,23 +26,24 @@ type Installment = {
   paid_at?: string;
 };
 
-const data: Installment[] = [
-  {
-    id: 1,
-    nomor_kontrak: "WG-20260212-8af7fcad",
-    bulan_ke: 1,
-    jumlah_tagihan: 25000000,
-    due_date: "2026-02-24",
-    status: "UNPAID",
-    paid_at: "2026-02-24",
-  },
-];
-
 type Props = {
   installments: Installment[];
 };
 
 const InstallmentTable = ({ installments }: Props) => {
+  const mutation = useMutation({
+    mutationFn: payInstallment,
+    onSuccess: (data) => {
+      toast(data.message, {
+        position: "top-center",
+        closeButton: true,
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["installments", installments[0].nomor_kontrak],
+      });
+    },
+  });
+
   return (
     <Table>
       <TableCaption>A list of your installments.</TableCaption>
@@ -67,10 +65,30 @@ const InstallmentTable = ({ installments }: Props) => {
             <TableCell className="text-center">{i.bulan_ke}</TableCell>
             <TableCell>{formatNominal(i.jumlah_tagihan)}</TableCell>
             <TableCell>{format(i.due_date, "dd-MMM-yyyy")}</TableCell>
-            <TableCell>{i.status}</TableCell>
-            <TableCell className="text-center">{i.paid_at || "-"}</TableCell>
+            <TableCell>
+              <Badge
+                className={
+                  i.status === "UNPAID"
+                    ? "bg-yellow-50 text-yellow-700 dark:bg-yellow-950 dark:text-yellow-300"
+                    : "bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300"
+                }
+              >
+                {i.status.toLocaleLowerCase()}
+              </Badge>
+            </TableCell>
+            <TableCell className="text-center">
+              {(i.paid_at &&
+                format(new Date(i.paid_at), "dd-MMM-yyyy 'at' HH:mm")) ||
+                "-"}
+            </TableCell>
             <TableCell className="text-right">
-              <Button className="cursor-pointer">Bayar</Button>
+              <Button
+                disabled={i.paid_at ? true : false}
+                className="cursor-pointer"
+                onClick={() => mutation.mutate(i.id)}
+              >
+                Bayar
+              </Button>
             </TableCell>
           </TableRow>
         ))}
