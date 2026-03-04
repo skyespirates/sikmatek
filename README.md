@@ -24,10 +24,6 @@
 
 ### Example of Go Concurrency Implementation
 
-![code](./docs/code.png)
-
-UBAH KE PARTIAL SUCCESS BOLEH DEH, SUSAH JUGA KALO ERROR SATU, ERROR SEMUA. PARTIAL SUCCESS NOW ALLOWED, YEEEY 🚀🚀🚀
-
 ![code update](./docs/code_updated.png)
 
 ## List of Dependencies
