@@ -12,10 +12,10 @@ const Limit = () => {
 
   return (
     <div>
-      <h1>Display Limit List</h1>
+      <h1>Daftar Limit</h1>
       {isLoading && <p>Loading...🚀🚀🚀</p>}
       {isError && <p>error: {error.message}</p>}
-      {isSuccess && <LimitTable limits={data} />}
+      {isSuccess && Array.isArray(data) && <LimitTable limits={data} />}
     </div>
   );
 };

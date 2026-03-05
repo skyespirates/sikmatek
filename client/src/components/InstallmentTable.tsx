@@ -10,7 +10,7 @@ import {
 import { formatNominal } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { payInstallment } from "@/services/installment";
 import { queryClient } from "@/main";
 import { toast } from "sonner";
@@ -59,39 +59,50 @@ const InstallmentTable = ({ installments }: Props) => {
         </TableRow>
       </TableHeader>
       <TableBody>
-        {installments.map((i) => (
-          <TableRow key={i.id}>
-            <TableCell className="font-medium">{i.nomor_kontrak}</TableCell>
-            <TableCell className="text-center">{i.bulan_ke}</TableCell>
-            <TableCell>{formatNominal(i.jumlah_tagihan)}</TableCell>
-            <TableCell>{format(i.due_date, "dd-MMM-yyyy")}</TableCell>
-            <TableCell>
-              <Badge
-                className={
-                  i.status === "UNPAID"
-                    ? "bg-yellow-50 text-yellow-700 dark:bg-yellow-950 dark:text-yellow-300"
-                    : "bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300"
-                }
-              >
-                {i.status.toLocaleLowerCase()}
-              </Badge>
-            </TableCell>
-            <TableCell className="text-center">
-              {(i.paid_at &&
-                format(new Date(i.paid_at), "dd-MMM-yyyy 'at' HH:mm")) ||
-                "-"}
-            </TableCell>
-            <TableCell className="text-right">
-              <Button
-                disabled={i.paid_at ? true : false}
-                className="cursor-pointer"
-                onClick={() => mutation.mutate(i.id)}
-              >
-                Bayar
-              </Button>
+        {!installments ? (
+          <TableRow>
+            <TableCell
+              colSpan={7}
+              className="h-24 text-center text-muted-foreground"
+            >
+              Belum ada cicilan yang dibuat.
             </TableCell>
           </TableRow>
-        ))}
+        ) : (
+          installments.map((i) => (
+            <TableRow key={i.id}>
+              <TableCell className="font-medium">{i.nomor_kontrak}</TableCell>
+              <TableCell className="text-center">{i.bulan_ke}</TableCell>
+              <TableCell>{formatNominal(i.jumlah_tagihan)}</TableCell>
+              <TableCell>{format(i.due_date, "dd-MMM-yyyy")}</TableCell>
+              <TableCell>
+                <Badge
+                  className={
+                    i.status === "UNPAID"
+                      ? "bg-yellow-50 text-yellow-700 dark:bg-yellow-950 dark:text-yellow-300"
+                      : "bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300"
+                  }
+                >
+                  {i.status.toLocaleLowerCase()}
+                </Badge>
+              </TableCell>
+              <TableCell className="text-center">
+                {(i.paid_at &&
+                  format(new Date(i.paid_at), "dd-MMM-yyyy 'at' HH:mm")) ||
+                  "-"}
+              </TableCell>
+              <TableCell className="text-right">
+                <Button
+                  disabled={i.paid_at ? true : false}
+                  className="cursor-pointer"
+                  onClick={() => mutation.mutate(i.id)}
+                >
+                  Bayar
+                </Button>
+              </TableCell>
+            </TableRow>
+          ))
+        )}
       </TableBody>
     </Table>
   );

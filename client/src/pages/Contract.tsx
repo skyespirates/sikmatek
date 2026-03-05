@@ -13,7 +13,7 @@ const Contract = () => {
       <p>Daftar Kontrak</p>
       {isLoading && <p>Loading... 🚀🚀🚀</p>}
       {isError && <p>error: {error.message}</p>}
-      {isSuccess && <ContractTable contracts={data} />}
+      {isSuccess && Array.isArray(data) && <ContractTable contracts={data} />}
     </div>
   );
 };

@@ -109,86 +109,99 @@ export function ContractTable({ contracts }: { contracts: Contract[] }) {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {paginatedContracts.map((contract) => (
-              <TableRow key={contract.nomor_kontrak}>
-                <TableCell className="font-medium">
-                  {contract.nomor_kontrak}
-                </TableCell>
-                <TableCell>{formatNominal(contract.otr)}</TableCell>
-                <TableCell>{formatNominal(contract.admin_fee)}</TableCell>
-                <TableCell>{formatNominal(contract.jumlah_bunga)}</TableCell>
-                <TableCell>{contract.tenor}</TableCell>
-                <TableCell>
-                  {formatNominal(contract.total_pembiayaan)}
-                </TableCell>
-                <TableCell>
-                  <Badge className={`${status[contract.status as statusKey]}`}>
-                    {contract.status.toLowerCase()}
-                  </Badge>
-                </TableCell>
-                <TableCell className="text-right">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="size-8 cursor-pointer"
-                      >
-                        <MoreHorizontalIcon />
-                        <span className="sr-only">Open menu</span>
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem
-                        className="cursor-pointer"
-                        onClick={() =>
-                          quoteMutation.mutate(contract.nomor_kontrak)
-                        }
-                      >
-                        Quote
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        className="cursor-pointer"
-                        onClick={() =>
-                          confirmMutation.mutate(contract.nomor_kontrak)
-                        }
-                      >
-                        Confirm
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        className="cursor-pointer"
-                        onClick={() =>
-                          cancelMutation.mutate(contract.nomor_kontrak)
-                        }
-                      >
-                        Cancel
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        className="cursor-pointer"
-                        onClick={() =>
-                          activateMutation.mutate(contract.nomor_kontrak)
-                        }
-                      >
-                        Activate
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        className="cursor-pointer"
-                        onClick={() => {
-                          setSelectedNomorKontrak(contract.nomor_kontrak);
-                          setOpen(true);
-                        }}
-                      >
-                        Cicilan
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem variant="destructive">
-                        Delete
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+            {contracts === null ? (
+              <TableRow>
+                <TableCell
+                  colSpan={8}
+                  className="h-24 text-center text-muted-foreground"
+                >
+                  Belum ada kontrak yang dibuat.
                 </TableCell>
               </TableRow>
-            ))}
+            ) : (
+              paginatedContracts.map((contract) => (
+                <TableRow key={contract.nomor_kontrak}>
+                  <TableCell className="font-medium">
+                    {contract.nomor_kontrak}
+                  </TableCell>
+                  <TableCell>{formatNominal(contract.otr)}</TableCell>
+                  <TableCell>{formatNominal(contract.admin_fee)}</TableCell>
+                  <TableCell>{formatNominal(contract.jumlah_bunga)}</TableCell>
+                  <TableCell>{contract.tenor}</TableCell>
+                  <TableCell>
+                    {formatNominal(contract.total_pembiayaan)}
+                  </TableCell>
+                  <TableCell>
+                    <Badge
+                      className={`${status[contract.status as statusKey]}`}
+                    >
+                      {contract.status.toLowerCase()}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="size-8 cursor-pointer"
+                        >
+                          <MoreHorizontalIcon />
+                          <span className="sr-only">Open menu</span>
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem
+                          className="cursor-pointer"
+                          onClick={() =>
+                            quoteMutation.mutate(contract.nomor_kontrak)
+                          }
+                        >
+                          Quote
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          className="cursor-pointer"
+                          onClick={() =>
+                            confirmMutation.mutate(contract.nomor_kontrak)
+                          }
+                        >
+                          Confirm
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          className="cursor-pointer"
+                          onClick={() =>
+                            cancelMutation.mutate(contract.nomor_kontrak)
+                          }
+                        >
+                          Cancel
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          className="cursor-pointer"
+                          onClick={() =>
+                            activateMutation.mutate(contract.nomor_kontrak)
+                          }
+                        >
+                          Activate
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          className="cursor-pointer"
+                          onClick={() => {
+                            setSelectedNomorKontrak(contract.nomor_kontrak);
+                            setOpen(true);
+                          }}
+                        >
+                          Cicilan
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem variant="destructive">
+                          Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
           </TableBody>
         </Table>
         <div className="flex items-center justify-between mt-4">
@@ -217,7 +230,7 @@ export function ContractTable({ contracts }: { contracts: Contract[] }) {
           </div>
         </div>
       </CardContent>
-      {isSuccess && Array.isArray(data) && (
+      {isSuccess && (
         <InstallmentModal open={open} setOpen={setOpen} installments={data} />
       )}
     </Card>
