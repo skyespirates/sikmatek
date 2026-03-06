@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"time"
@@ -17,7 +16,7 @@ func (app *application) serve() error {
 		WriteTimeout: 30 * time.Second,
 	}
 
-	log.Printf("%s", fmt.Sprintf("server running on port %s", os.Getenv("PORT")))
+	app.logger.PrintInfo(fmt.Sprintf("server running on port %s", os.Getenv("PORT")), nil)
 
 	return srv.ListenAndServe()
 }

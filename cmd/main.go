@@ -2,29 +2,29 @@ package main
 
 import (
 	"database/sql"
-	"log"
 	"os"
 
 	"github.com/cloudinary/cloudinary-go/v2"
 	"github.com/joho/godotenv"
 	"github.com/skyespirates/sikmatek/internal/infra/mysql"
-	"github.com/skyespirates/sikmatek/internal/logger"
+	"github.com/skyespirates/sikmatek/internal/utils"
 )
 
 type application struct {
-	logger *logger.Logger
+	logger *utils.Logger
 	db     *sql.DB
 	c      *cloudinary.Cloudinary
 }
 
 func main() {
 	godotenv.Load()
+	logger := utils.New(os.Stdout, utils.LevelInfo)
 
 	cld, err := cloudinary.New()
 	if err != nil {
-		log.Fatal("connection failed to cloudinary")
+		logger.PrintFatal(err, nil)
 	}
-	log.Println("connected to cloudinary")
+	logger.PrintInfo("connected to cloudinary", nil)
 
 	db, err := mysql.InitDb()
 	if err != nil {
@@ -32,9 +32,7 @@ func main() {
 	}
 	defer db.Close()
 
-	log.Println("database connection pool established")
-
-	logger := logger.New(os.Stdout)
+	logger.PrintInfo("database connection pool established", nil)
 
 	app := &application{
 		logger: logger,

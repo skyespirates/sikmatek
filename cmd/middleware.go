@@ -11,9 +11,9 @@ import (
 
 func (app *application) loggerMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		app.logger.LogInfo(r, "request")
+		app.logger.PrintInfo("request", nil)
 		next.ServeHTTP(w, r)
-		app.logger.LogInfo(r, "response")
+		app.logger.PrintInfo("response", nil)
 	})
 }
 
