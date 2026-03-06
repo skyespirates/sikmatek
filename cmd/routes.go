@@ -51,7 +51,7 @@ func (app *application) routes() http.Handler {
 	// router.ServeFiles("/assets/*filepath", http.Dir("client/dist/assets"))
 	router.ServeFiles("/uploads/*filepath", http.Dir("static/uploads"))
 
-	router.HandlerFunc(http.MethodGet, "/api/healthcheck", healthcheck)
+	router.HandlerFunc(http.MethodGet, "/api/v1/healthcheck", healthcheck)
 
 	// auth service
 	router.HandlerFunc(http.MethodPost, "/api/v1/auth/register", userHandler.Register)

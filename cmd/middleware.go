@@ -2,18 +2,50 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"slices"
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/skyespirates/sikmatek/internal/utils"
 )
 
+type responseRecorder struct {
+	http.ResponseWriter
+	status int
+}
+
 func (app *application) loggerMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		app.logger.PrintInfo("request", nil)
-		next.ServeHTTP(w, r)
-		app.logger.PrintInfo("response", nil)
+
+		start := time.Now()
+
+		rec := &responseRecorder{
+			ResponseWriter: w,
+			status:         http.StatusOK,
+		}
+
+		app.logger.PrintInfo("request_started", map[string]string{
+			"method":      r.Method,
+			"path":        r.URL.Path,
+			"remote_addr": r.RemoteAddr,
+			"user_agent":  r.UserAgent(),
+		})
+
+		next.ServeHTTP(rec, r)
+
+		duration := time.Since(start)
+		durationMs := float64(duration) / float64(time.Millisecond)
+
+		app.logger.PrintInfo("request_completed", map[string]string{
+			"method":      r.Method,
+			"path":        r.URL.Path,
+			"status":      strconv.Itoa(rec.status),
+			"duration":    fmt.Sprintf("%.2fms", durationMs),
+			"remote_addr": r.RemoteAddr,
+		})
 	})
 }
 
