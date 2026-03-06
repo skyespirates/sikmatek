@@ -3,13 +3,16 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"net"
 	"net/http"
 	"slices"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/skyespirates/sikmatek/internal/utils"
+	"golang.org/x/time/rate"
 )
 
 type responseRecorder struct {
@@ -130,4 +133,69 @@ func (app *application) authorize(allowedRoles ...int) func(http.HandlerFunc) ht
 		}
 	}
 
+}
+
+func (app *application) rateLimit(next http.Handler) http.Handler {
+
+	type client struct {
+		limiter  *rate.Limiter
+		lastSeen time.Time
+	}
+
+	var (
+		mu      sync.Mutex
+		clients = make(map[string]*client)
+	)
+
+	// clean up expired client
+	go func() {
+		for {
+			time.Sleep(time.Minute)
+			mu.Lock()
+			for ip, client := range clients {
+				if time.Since(client.lastSeen) > 3*time.Minute {
+					delete(clients, ip)
+				}
+			}
+			mu.Unlock()
+		}
+	}()
+
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+		ip, _, err := net.SplitHostPort(r.RemoteAddr)
+		if err != nil {
+			app.logger.PrintError(err, nil)
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte("internal server error"))
+			return
+		}
+
+		mu.Lock()
+
+		_, ok := clients[ip]
+		if !ok {
+			clients[ip] = &client{
+				limiter: rate.NewLimiter(2, 4),
+			}
+		}
+
+		clients[ip].lastSeen = time.Now()
+
+		if !clients[ip].limiter.Allow() {
+			mu.Unlock()
+			app.logger.PrintInfo("request_rate_limited", map[string]string{
+				"method": r.Method,
+				"path":   r.URL.Path,
+				"ip":     ip,
+			})
+			w.WriteHeader(http.StatusTooManyRequests)
+			w.Write([]byte("rate limit exceeded"))
+			return
+		}
+
+		mu.Unlock()
+
+		next.ServeHTTP(w, r)
+	})
 }

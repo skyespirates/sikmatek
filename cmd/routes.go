@@ -118,7 +118,7 @@ func (app *application) routes() http.Handler {
 		serveReactApp(w, r)
 	})
 
-	return app.loggerMiddleware(router)
+	return app.loggerMiddleware(app.rateLimit(router))
 }
 
 func healthcheck(w http.ResponseWriter, r *http.Request) {
