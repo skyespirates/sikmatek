@@ -6,10 +6,14 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/go-playground/validator/v10"
+
 	"github.com/skyespirates/sikmatek/internal/entity"
 	"github.com/skyespirates/sikmatek/internal/infra/mysql"
 	"github.com/skyespirates/sikmatek/internal/usecase"
 )
+
+var validate = validator.New()
 
 type userHandler struct {
 	uc usecase.UserUsecase
@@ -63,6 +67,13 @@ func (h *userHandler) Login(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "bad request", http.StatusBadRequest)
 		return
 	}
+
+	err = validate.Struct(payload)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
 	token, err := h.uc.Login(r.Context(), &payload)
 	if err != nil {
 		log.Printf("error: %s", err.Error())

@@ -92,7 +92,7 @@ func (uc *userUsecase) Login(ctx context.Context, payload *entity.LoginPayload) 
 
 	user, err := uc.ur.FindByEmail(ctx, uc.db, payload.Email)
 	if err != nil {
-		return "", err
+		return "", ErrNotFound
 	}
 
 	var consumerId int
