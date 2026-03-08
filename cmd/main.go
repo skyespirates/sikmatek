@@ -8,12 +8,14 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/skyespirates/sikmatek/internal/infra/mysql"
 	"github.com/skyespirates/sikmatek/internal/utils"
+	"github.com/skyespirates/sikmatek/internal/validator"
 )
 
 type application struct {
 	logger *utils.Logger
 	db     *sql.DB
 	c      *cloudinary.Cloudinary
+	v      *validator.Validator
 }
 
 func main() {
@@ -34,10 +36,13 @@ func main() {
 
 	logger.PrintInfo("database connection pool established", nil)
 
+	v := validator.New()
+
 	app := &application{
 		logger: logger,
 		db:     db,
 		c:      cld,
+		v:      v,
 	}
 
 	app.serve()

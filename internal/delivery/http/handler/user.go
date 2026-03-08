@@ -6,21 +6,22 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/go-playground/validator/v10"
-
 	"github.com/skyespirates/sikmatek/internal/entity"
 	"github.com/skyespirates/sikmatek/internal/infra/mysql"
 	"github.com/skyespirates/sikmatek/internal/usecase"
+	"github.com/skyespirates/sikmatek/internal/utils"
+	"github.com/skyespirates/sikmatek/internal/validator"
 )
 
 var validate = validator.New()
 
 type userHandler struct {
 	uc usecase.UserUsecase
+	v  *validator.Validator
 }
 
-func NewUserHandler(uc usecase.UserUsecase) *userHandler {
-	return &userHandler{uc: uc}
+func NewUserHandler(uc usecase.UserUsecase, v *validator.Validator) *userHandler {
+	return &userHandler{uc: uc, v: v}
 }
 
 func (h *userHandler) Register(w http.ResponseWriter, r *http.Request) {
@@ -68,9 +69,10 @@ func (h *userHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = validate.Struct(payload)
+	err = h.v.Validate(payload)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		errors := validator.FormatErrors(err)
+		utils.JSONResponse(w, "validation errors", errors)
 		return
 	}
 

@@ -39,7 +39,7 @@ func (app *application) routes() http.Handler {
 	dashboardUC := usecase.NewDashboardUsecase(app.db, consumerRepo, limitRepo, contractRepo, productRepo)
 
 	// handlers
-	userHandler := handler.NewUserHandler(userUC)
+	userHandler := handler.NewUserHandler(userUC, app.v)
 	consumerHandler := handler.NewConsumerHandler(consumerUC, app.c)
 	limitHandler := handler.NewLimitHandler(limitUC)
 	contractHandler := handler.NewContractHandler(contractUC)
