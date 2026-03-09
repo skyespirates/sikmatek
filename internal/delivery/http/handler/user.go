@@ -8,12 +8,10 @@ import (
 
 	"github.com/skyespirates/sikmatek/internal/entity"
 	"github.com/skyespirates/sikmatek/internal/infra/mysql"
+	"github.com/skyespirates/sikmatek/internal/response"
 	"github.com/skyespirates/sikmatek/internal/usecase"
-	"github.com/skyespirates/sikmatek/internal/utils"
 	"github.com/skyespirates/sikmatek/internal/validator"
 )
-
-var validate = validator.New()
 
 type userHandler struct {
 	uc usecase.UserUsecase
@@ -33,6 +31,13 @@ func (h *userHandler) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	err = h.v.Validate(payload)
+	if err != nil {
+		errors := validator.FormatErrors(err)
+		response.Error(w, http.StatusBadRequest, "validation error", errors)
+		return
+	}
+
 	token, err := h.uc.Register(r.Context(), &payload)
 	if err != nil {
 		log.Printf("error: %s", err.Error())
@@ -45,15 +50,9 @@ func (h *userHandler) Register(w http.ResponseWriter, r *http.Request) {
 	}
 
 	resp := map[string]any{}
-	resp["message"] = "user registered successfully"
 	resp["token"] = token
 
-	w.WriteHeader(http.StatusCreated)
-	err = json.NewEncoder(w).Encode(resp)
-	if err != nil {
-		log.Printf("error: %s", err.Error())
-		http.Error(w, "internal server error", http.StatusInternalServerError)
-	}
+	response.Success(w, http.StatusCreated, "registered successfully", resp)
 
 }
 
@@ -72,7 +71,7 @@ func (h *userHandler) Login(w http.ResponseWriter, r *http.Request) {
 	err = h.v.Validate(payload)
 	if err != nil {
 		errors := validator.FormatErrors(err)
-		utils.JSONResponse(w, "validation errors", errors)
+		response.Error(w, http.StatusBadRequest, "validation error", errors)
 		return
 	}
 
@@ -87,14 +86,8 @@ func (h *userHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	res := make(map[string]string)
-	res["message"] = "login successfully"
+	res := make(map[string]interface{})
 	res["token"] = token
 
-	err = json.NewEncoder(w).Encode(res)
-	if err != nil {
-		log.Printf("error: %s", err.Error())
-		http.Error(w, "something went wrong", http.StatusInternalServerError)
-	}
-
+	response.Success(w, http.StatusOK, "login successfully", res)
 }
