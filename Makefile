@@ -46,3 +46,6 @@ db/migrations/version:
 .PHONY: db/migrations/force
 db/migrations/force:
 	@migrate -database $(dsn) -path $(migrations_path) force $(version)
+
+swagger:
+	swag init -g ./cmd/main.go

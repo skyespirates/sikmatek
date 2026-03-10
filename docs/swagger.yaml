@@ -1,0 +1,22 @@
+basePath: /
+host: localhost:3000
+info:
+  contact: {}
+  description: Example server using net/http
+  title: Example API
+  version: "1.0"
+paths:
+  /hello:
+    get:
+      description: returns greeting
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: Say hello
+      tags:
+      - example
+swagger: "2.0"

@@ -176,7 +176,7 @@ func (app *application) rateLimit(next http.Handler) http.Handler {
 		_, ok := clients[ip]
 		if !ok {
 			clients[ip] = &client{
-				limiter: rate.NewLimiter(2, 4),
+				limiter: rate.NewLimiter(2, 10),
 			}
 		}
 

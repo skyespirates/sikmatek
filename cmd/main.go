@@ -18,6 +18,11 @@ type application struct {
 	v      *validator.Validator
 }
 
+// @title Example API
+// @version 1.0
+// @description Example server using net/http
+// @host localhost:3000
+// @BasePath /
 func main() {
 	godotenv.Load()
 	logger := utils.New(os.Stdout, utils.LevelInfo)

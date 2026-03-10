@@ -8,10 +8,12 @@ import (
 	"strings"
 
 	"github.com/julienschmidt/httprouter"
+	_ "github.com/skyespirates/sikmatek/docs"
 	"github.com/skyespirates/sikmatek/internal/delivery/http/handler"
 	"github.com/skyespirates/sikmatek/internal/infra/mysql"
 	"github.com/skyespirates/sikmatek/internal/usecase"
 	"github.com/skyespirates/sikmatek/internal/utils"
+	httpSwagger "github.com/swaggo/http-swagger"
 )
 
 //go:embed dist
@@ -19,6 +21,8 @@ var embeddedFiles embed.FS
 
 func (app *application) routes() http.Handler {
 	router := httprouter.New()
+
+	router.Handler(http.MethodGet, "/api/v1/swagger/*filepath", httpSwagger.WrapHandler)
 
 	// repositories
 	userRepo := mysql.NewUserRepository(app.db)
@@ -121,6 +125,13 @@ func (app *application) routes() http.Handler {
 	return app.loggerMiddleware(app.rateLimit(router))
 }
 
+// Hello godoc
+// @Summary Say hello
+// @Description returns greeting
+// @Tags example
+// @Produce json
+// @Success 200 {string} string
+// @Router /hello [get]
 func healthcheck(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("All iz well 👌"))
 }
