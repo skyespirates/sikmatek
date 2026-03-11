@@ -22,6 +22,14 @@ func NewUserHandler(uc usecase.UserUsecase, v *validator.Validator) *userHandler
 	return &userHandler{uc: uc, v: v}
 }
 
+// @Summary Register new user
+// @Description returns jwt token
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param data body entity.RegisterPayload true "Register Data"
+// @Success 200 {object} response.Response
+// @Router /auth/register [post]
 func (h *userHandler) Register(w http.ResponseWriter, r *http.Request) {
 
 	var payload entity.RegisterPayload
@@ -56,6 +64,14 @@ func (h *userHandler) Register(w http.ResponseWriter, r *http.Request) {
 
 }
 
+// @Summary Login user
+// @Description returns jwt token
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param data body entity.LoginPayload true "Login Data"
+// @Success 200 {object} response.Response
+// @Router /auth/login [post]
 func (h *userHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 	defer r.Body.Close()

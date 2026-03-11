@@ -126,12 +126,12 @@ func (app *application) routes() http.Handler {
 }
 
 // Hello godoc
-// @Summary Say hello
-// @Description returns greeting
-// @Tags example
+// @Summary Health check enpoint
+// @Description returns string "All iz well 👌"
+// @Tags default
 // @Produce json
 // @Success 200 {string} string
-// @Router /hello [get]
+// @Router /healthcheck [get]
 func healthcheck(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("All iz well 👌"))
 }

@@ -1,14 +1,93 @@
-basePath: /
+basePath: /api/v1
+definitions:
+  entity.LoginPayload:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  entity.RegisterPayload:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  handler.Request:
+    properties:
+      requested_limit:
+        type: integer
+    type: object
+  response.Response:
+    properties:
+      data: {}
+      errors: {}
+      message:
+        type: string
+      success:
+        type: boolean
+    type: object
 host: localhost:3000
 info:
   contact: {}
-  description: Example server using net/http
-  title: Example API
+  description: API documentation for Skyes Funding App
+  title: Krediyam API
   version: "1.0"
 paths:
-  /hello:
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: returns jwt token
+      parameters:
+      - description: Login Data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/entity.LoginPayload'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Login user
+      tags:
+      - auth
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: returns jwt token
+      parameters:
+      - description: Register Data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/entity.RegisterPayload'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Register new user
+      tags:
+      - auth
+  /healthcheck:
     get:
-      description: returns greeting
+      description: "returns string \"All iz well \U0001F44C\""
       produces:
       - application/json
       responses:
@@ -16,7 +95,50 @@ paths:
           description: OK
           schema:
             type: string
-      summary: Say hello
+      summary: Health check enpoint
       tags:
-      - example
+      - default
+  /limits:
+    get:
+      description: returns list limit of current user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: Limit list
+      tags:
+      - limit
+    post:
+      consumes:
+      - application/json
+      description: returns id newly created limit
+      parameters:
+      - description: Pengajuan Limit
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/handler.Request'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: Pengajuan limit
+      tags:
+      - limit
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

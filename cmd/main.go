@@ -18,11 +18,14 @@ type application struct {
 	v      *validator.Validator
 }
 
-// @title Example API
+// @title Krediyam API
 // @version 1.0
-// @description Example server using net/http
+// @description API documentation for Skyes Funding App
 // @host localhost:3000
-// @BasePath /
+// @BasePath /api/v1
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
 func main() {
 	godotenv.Load()
 	logger := utils.New(os.Stdout, utils.LevelInfo)

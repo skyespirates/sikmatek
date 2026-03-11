@@ -23,6 +23,13 @@ func NewLimitHandler(uc usecase.LimitUsecase) *limitHandler {
 	}
 }
 
+// @Summary Limit list
+// @Description returns list limit of current user
+// @Tags limit
+// @Produce json
+// @Success 200 {object} response.Response
+// @Router /limits [get]
+// @Security BearerAuth
 func (h *limitHandler) LimitList(w http.ResponseWriter, r *http.Request) {
 
 	limit, err := h.uc.GetList(r.Context())
@@ -40,6 +47,19 @@ func (h *limitHandler) LimitList(w http.ResponseWriter, r *http.Request) {
 
 }
 
+type Request struct {
+	Requested int `json:"requested_limit"`
+}
+
+// @Summary Pengajuan limit
+// @Description returns id newly created limit
+// @Tags limit
+// @Accept json
+// @Produce json
+// @Param data body Request true "Pengajuan Limit"
+// @Success 201 {object} response.Response
+// @Router /limits [post]
+// @Security BearerAuth
 func (h *limitHandler) Pengajuan(w http.ResponseWriter, r *http.Request) {
 
 	var payload struct {
