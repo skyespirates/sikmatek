@@ -47,7 +47,7 @@ func (app *application) routes() http.Handler {
 	consumerHandler := handler.NewConsumerHandler(consumerUC, app.c)
 	limitHandler := handler.NewLimitHandler(limitUC)
 	contractHandler := handler.NewContractHandler(contractUC)
-	productHandler := handler.NewProductHandler(productUC)
+	productHandler := handler.NewProductHandler(productUC, app.v)
 	installmentHandler := handler.NewInstallmentHandler(installmentUC)
 	dashboardHandler := handler.NewDashboardHandler(dashboardUC)
 

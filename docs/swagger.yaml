@@ -1,5 +1,14 @@
 basePath: /api/v1
 definitions:
+  entity.CreateProductPayload:
+    properties:
+      harga:
+        type: integer
+      kategori:
+        type: string
+      nama_produk:
+        type: string
+    type: object
   entity.LoginPayload:
     properties:
       email:
@@ -136,6 +145,44 @@ paths:
       summary: Pengajuan limit
       tags:
       - limit
+  /products:
+    get:
+      description: returns list of products
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: Get list of products
+      tags:
+      - product
+    post:
+      consumes:
+      - application/json
+      description: returns id of newly created product
+      parameters:
+      - description: Create Product
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/entity.CreateProductPayload'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: Create a product
+      tags:
+      - product
 securityDefinitions:
   BearerAuth:
     in: header
