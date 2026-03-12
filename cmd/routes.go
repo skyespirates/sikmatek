@@ -60,6 +60,7 @@ func (app *application) routes() http.Handler {
 	// auth service
 	router.HandlerFunc(http.MethodPost, "/api/v1/auth/register", userHandler.Register)
 	router.HandlerFunc(http.MethodPost, "/api/v1/auth/login", userHandler.Login)
+	router.HandlerFunc(http.MethodPost, "/api/v1/auth/refresh", userHandler.Refresh)
 
 	// consumers service
 	router.HandlerFunc(http.MethodGet, "/api/v1/consumers", app.authenticate(app.authorize(utils.Roles["admin"], utils.Roles["consumer"])(consumerHandler.GetConsumerInfo)))

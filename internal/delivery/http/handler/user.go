@@ -107,3 +107,7 @@ func (h *userHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 	response.Success(w, http.StatusOK, "login successfully", res)
 }
+
+func (h *userHandler) Refresh(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("refresh token 🚀"))
+}
