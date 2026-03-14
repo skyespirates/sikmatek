@@ -16,20 +16,23 @@ var ErrNotFound = errors.New("incorrect username or password")
 
 type UserUsecase interface {
 	Register(context.Context, *entity.RegisterPayload) (string, error)
-	Login(context.Context, *entity.LoginPayload) (string, error)
+	Login(context.Context, *entity.LoginPayload) (string, string, error)
+	Refresh(context.Context, string) (string, error)
 }
 
 type userUsecase struct {
 	db *sql.DB
 	ur repository.UserRepository
 	cr repository.ConsumerRepository
+	rr repository.RefreshTokenRepository
 }
 
-func NewUserUsecase(db *sql.DB, ur repository.UserRepository, cr repository.ConsumerRepository) *userUsecase {
+func NewUserUsecase(db *sql.DB, ur repository.UserRepository, cr repository.ConsumerRepository, rr repository.RefreshTokenRepository) *userUsecase {
 	return &userUsecase{
 		db: db,
 		ur: ur,
 		cr: cr,
+		rr: rr,
 	}
 }
 
@@ -85,14 +88,14 @@ func (uc *userUsecase) Register(ctx context.Context, payload *entity.RegisterPay
 
 }
 
-func (uc *userUsecase) Login(ctx context.Context, payload *entity.LoginPayload) (string, error) {
+func (uc *userUsecase) Login(ctx context.Context, payload *entity.LoginPayload) (string, string, error) {
 
 	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
 	defer cancel()
 
 	user, err := uc.ur.FindByEmail(ctx, uc.db, payload.Email)
 	if err != nil {
-		return "", ErrNotFound
+		return "", "", ErrNotFound
 	}
 
 	var consumerId int
@@ -103,18 +106,18 @@ func (uc *userUsecase) Login(ctx context.Context, payload *entity.LoginPayload) 
 	} else {
 		consumer, err := uc.cr.GetIdByUserId(ctx, uc.db, user.Id)
 		if err != nil {
-			return "", err
+			return "", "", err
 		}
 		consumerId = consumer.Id
 		isVerified, err = uc.cr.GetIsVerifiedById(ctx, uc.db, consumerId)
 		if err != nil {
-			return "", err
+			return "", "", err
 		}
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(payload.Password))
 	if err != nil {
-		return "", ErrNotFound
+		return "", "", ErrNotFound
 	}
 
 	usr := utils.JwtPayload{
@@ -127,6 +130,43 @@ func (uc *userUsecase) Login(ctx context.Context, payload *entity.LoginPayload) 
 
 	token := utils.GenerateToken(usr)
 
-	return token, nil
+	refreshToken, err := utils.GenerateRefreshToken()
+	if err != nil {
+		return "", "", err
+	}
 
+	hashed := utils.HashRefreshToken(refreshToken)
+	err = uc.rr.Insert(ctx, user.Id, hashed)
+	if err != nil {
+		return "", "", err
+	}
+
+	return token, hashed, nil
+
+}
+
+func (uc *userUsecase) Refresh(ctx context.Context, refresh_token string) (string, error) {
+
+	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
+	defer cancel()
+
+	token, err := uc.rr.Get(ctx, refresh_token)
+	if err != nil {
+		return "", err
+	}
+
+	if time.Now().After(token.ExpiresAt) {
+		return "nil", errors.New("refresh token has expired")
+	}
+
+	user := utils.ContextGetUser(ctx)
+	payload := utils.JwtPayload{
+		Id:         user.Id,
+		Email:      user.Email,
+		RoleId:     user.RoleId,
+		ConsumerId: user.ConsumerId,
+		IsVerified: user.IsVerified,
+	}
+
+	return utils.GenerateToken(payload), nil
 }

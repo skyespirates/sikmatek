@@ -32,9 +32,10 @@ func (app *application) routes() http.Handler {
 	productRepo := mysql.NewProductRepository()
 	installmentRepo := mysql.NewInstallmentRepository()
 	limitUsageRepo := mysql.NewLimitUsageRepository()
+	refreshTokenRepo := mysql.NewRefreshTokenRepository(app.db)
 
 	// usecases
-	userUC := usecase.NewUserUsecase(app.db, userRepo, consumerRepo)
+	userUC := usecase.NewUserUsecase(app.db, userRepo, consumerRepo, refreshTokenRepo)
 	consumerUC := usecase.NewConsumerUsecase(app.db, consumerRepo)
 	limitUC := usecase.NewLimitUsecase(app.db, limitRepo)
 	contractUC := usecase.NewContractUsecase(app.db, contractRepo, limitRepo, productRepo, installmentRepo)
@@ -60,7 +61,7 @@ func (app *application) routes() http.Handler {
 	// auth service
 	router.HandlerFunc(http.MethodPost, "/api/v1/auth/register", userHandler.Register)
 	router.HandlerFunc(http.MethodPost, "/api/v1/auth/login", userHandler.Login)
-	router.HandlerFunc(http.MethodPost, "/api/v1/auth/refresh", userHandler.Refresh)
+	router.HandlerFunc(http.MethodPost, "/api/v1/auth/refresh", app.authenticate(app.authorize(utils.Roles["admin"], utils.Roles["consumer"])(userHandler.Refresh)))
 
 	// consumers service
 	router.HandlerFunc(http.MethodGet, "/api/v1/consumers", app.authenticate(app.authorize(utils.Roles["admin"], utils.Roles["consumer"])(consumerHandler.GetConsumerInfo)))

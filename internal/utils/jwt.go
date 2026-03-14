@@ -26,7 +26,7 @@ type JwtPayload struct {
 }
 
 func GenerateToken(payload JwtPayload) string {
-	expirationTime := time.Now().Add(24 * time.Hour)
+	expirationTime := time.Now().Add(1 * time.Minute)
 
 	claims := &Claims{
 		Id:         payload.Id,

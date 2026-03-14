@@ -91,7 +91,7 @@ func (h *userHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := h.uc.Login(r.Context(), &payload)
+	token, hashed, err := h.uc.Login(r.Context(), &payload)
 	if err != nil {
 		log.Printf("error: %s", err.Error())
 		if errors.Is(err, usecase.ErrNotFound) {
@@ -104,10 +104,33 @@ func (h *userHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 	res := make(map[string]interface{})
 	res["token"] = token
+	res["refresh_token"] = hashed
 
 	response.Success(w, http.StatusOK, "login successfully", res)
 }
 
 func (h *userHandler) Refresh(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("refresh token 🚀"))
+
+	var input struct {
+		RefreshToken string `json:"refresh_token"`
+	}
+
+	err := json.NewDecoder(r.Body).Decode(&input)
+	if err != nil {
+		response.Error(w, http.StatusBadRequest, "bad request", err)
+		return
+	}
+
+	token, err := h.uc.Refresh(r.Context(), input.RefreshToken)
+	if err != nil {
+		response.Error(w, http.StatusInternalServerError, "failed to generate new token", err)
+		return
+	}
+
+	res := map[string]any{
+		"token": token,
+	}
+
+	response.Success(w, http.StatusOK, "new access token token generated successfully", res)
+
 }
