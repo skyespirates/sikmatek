@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"net"
 	"net/http"
@@ -11,6 +10,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/skyespirates/sikmatek/internal/response"
 	"github.com/skyespirates/sikmatek/internal/utils"
 	"golang.org/x/time/rate"
 )
@@ -57,24 +57,14 @@ func (app *application) authenticate(next http.HandlerFunc) http.HandlerFunc {
 		// ambil header authorization
 		authorizationToken := r.Header.Get("Authorization")
 		if authorizationToken == "" {
-			res := map[string]string{}
-			res["status"] = "unauthorized"
-			res["message"] = "missing token"
-			w.WriteHeader(http.StatusUnauthorized)
-			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(res)
+			response.Error(w, http.StatusUnauthorized, "missing token", nil)
 			return
 		}
 
 		// split it
 		parts := strings.Split(authorizationToken, " ")
 		if parts[0] != "Bearer" {
-			res := map[string]string{}
-			res["status"] = "unauthorized"
-			res["message"] = "token must be Bearer"
-			w.WriteHeader(http.StatusUnauthorized)
-			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(res)
+			response.Error(w, http.StatusUnauthorized, "token must be bearer", nil)
 			return
 		}
 
@@ -84,31 +74,11 @@ func (app *application) authenticate(next http.HandlerFunc) http.HandlerFunc {
 		// verify token
 		claim, err := utils.VerifyToken(token)
 		if err != nil {
-			res := map[string]string{}
-			res["status"] = "invalid credential"
-			res["message"] = err.Error()
-			w.WriteHeader(http.StatusUnauthorized)
-			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(res)
+			response.Error(w, http.StatusUnauthorized, "invalid credentials", err)
 			return
 		}
 
 		r = utils.ContextSetUser(r, claim)
-
-		next.ServeHTTP(w, r)
-	})
-}
-
-func (app *application) corsMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-		w.Header().Set("Access-Control-Allow-Headers", "Authorization, Content-Type")
-
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 
 		next.ServeHTTP(w, r)
 	})
@@ -120,7 +90,7 @@ func (app *application) authorize(allowedRoles ...int) func(http.HandlerFunc) ht
 		return func(w http.ResponseWriter, r *http.Request) {
 			claim := utils.ContextGetUser(r.Context()) // retrieve claims from context
 			if claim == nil {
-				http.Error(w, "unauthorized", http.StatusUnauthorized)
+				response.Error(w, http.StatusUnauthorized, "unauthorized", nil)
 				return
 			}
 
@@ -129,7 +99,7 @@ func (app *application) authorize(allowedRoles ...int) func(http.HandlerFunc) ht
 				return
 			}
 
-			http.Error(w, "forbidden", http.StatusForbidden)
+			response.Error(w, http.StatusForbidden, "forbidden", nil)
 		}
 	}
 
@@ -189,8 +159,7 @@ func (app *application) rateLimit(next http.Handler) http.Handler {
 				"path":   r.URL.Path,
 				"ip":     ip,
 			})
-			w.WriteHeader(http.StatusTooManyRequests)
-			w.Write([]byte("rate limit exceeded"))
+			response.Error(w, http.StatusTooManyRequests, "rate limit exceeded", nil)
 			return
 		}
 
