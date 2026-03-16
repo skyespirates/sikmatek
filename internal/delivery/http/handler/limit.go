@@ -2,13 +2,13 @@ package handler
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"strconv"
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/skyespirates/sikmatek/internal/entity"
+	"github.com/skyespirates/sikmatek/internal/response"
 	"github.com/skyespirates/sikmatek/internal/usecase"
 	"github.com/skyespirates/sikmatek/internal/utils"
 )
@@ -68,23 +68,19 @@ func (h *limitHandler) Pengajuan(w http.ResponseWriter, r *http.Request) {
 
 	err := json.NewDecoder(r.Body).Decode(&payload)
 	if err != nil {
-		http.Error(w, "bad request", http.StatusBadRequest)
+		response.Error(w, http.StatusBadRequest, "invalid json", err)
 		return
 	}
 
 	id, err := h.uc.AjukanLimit(r.Context(), payload.Requested)
 	if err != nil {
 		log.Printf("error: %s", err.Error())
-		http.Error(w, "internal server error", http.StatusInternalServerError)
+		response.Error(w, http.StatusInternalServerError, "failed to request limit", err)
 		return
 	}
 
-	location := fmt.Sprintf("/v1/limits/%d", id)
-
-	w.WriteHeader(http.StatusCreated)
-	w.Header().Set("Location", location)
-
-	fmt.Fprintf(w, `{"id": %d}`, id)
+	res := map[string]any{"id": id}
+	response.Success(w, http.StatusCreated, "limit has been requested successfully", res)
 
 }
 
@@ -97,7 +93,7 @@ func (h *limitHandler) Approve(w http.ResponseWriter, r *http.Request) {
 
 	limit_id, err := strconv.Atoi(id)
 	if err != nil {
-		http.Error(w, "bad request, limit id must be a number", http.StatusBadRequest)
+		response.Error(w, http.StatusBadRequest, "bad request, limit id must be a number", err)
 		return
 	}
 
@@ -107,11 +103,12 @@ func (h *limitHandler) Approve(w http.ResponseWriter, r *http.Request) {
 	err = h.uc.TindakLanjut(r.Context(), payload)
 	if err != nil {
 		log.Printf("error: %s", err.Error())
-		http.Error(w, "internal server error", http.StatusInternalServerError)
+		response.Error(w, http.StatusInternalServerError, "failed to approve limit", err)
 		return
 	}
 
-	utils.JSONResponse(w, "limit has been approved", nil)
+	response.Success(w, http.StatusOK, "limit has been approved successfully", nil)
+
 }
 
 func (h *limitHandler) Reject(w http.ResponseWriter, r *http.Request) {
@@ -124,7 +121,7 @@ func (h *limitHandler) Reject(w http.ResponseWriter, r *http.Request) {
 
 	limit_id, err := strconv.Atoi(id)
 	if err != nil {
-		http.Error(w, "bad request, limit id must be a number", http.StatusBadRequest)
+		response.Error(w, http.StatusBadRequest, "bad request, limit id must be a number", err)
 		return
 	}
 
@@ -134,11 +131,11 @@ func (h *limitHandler) Reject(w http.ResponseWriter, r *http.Request) {
 	err = h.uc.TindakLanjut(r.Context(), payload)
 	if err != nil {
 		log.Printf("error: %s", err.Error())
-		http.Error(w, "internal server error", http.StatusInternalServerError)
+		response.Error(w, http.StatusInternalServerError, "failed to reject limit", err)
 		return
 	}
 
-	utils.JSONResponse(w, "limit has been rejected", nil)
+	response.Success(w, http.StatusOK, "limit has been rejected successfully", nil)
 
 }
 
@@ -150,14 +147,11 @@ func (h *limitHandler) ListApproved(w http.ResponseWriter, r *http.Request) {
 
 	limits, err := h.uc.ListLimitAktif(r.Context())
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		response.Error(w, http.StatusInternalServerError, "failed to get list of approved limit", err)
 		return
 	}
 
-	resp := map[string]any{}
-	resp["limits"] = limits
-
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(resp)
+	resp := map[string]any{"limits": limits}
+	response.Success(w, http.StatusOK, "list of approved limit", resp)
 
 }
