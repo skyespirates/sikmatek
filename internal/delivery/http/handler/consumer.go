@@ -3,7 +3,6 @@ package handler
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"log"
 	"net/http"
 
@@ -12,6 +11,7 @@ import (
 	"github.com/julienschmidt/httprouter"
 	"github.com/skyespirates/sikmatek/internal/entity"
 	"github.com/skyespirates/sikmatek/internal/infra/mysql"
+	"github.com/skyespirates/sikmatek/internal/response"
 	"github.com/skyespirates/sikmatek/internal/usecase"
 	"github.com/skyespirates/sikmatek/internal/utils"
 )
@@ -32,11 +32,11 @@ func (h *consumerHandler) GetConsumerInfo(w http.ResponseWriter, r *http.Request
 
 	info, err := h.uc.GetInfo(r.Context())
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		response.Error(w, http.StatusInternalServerError, "failed to get customer info", err)
 		return
 	}
 
-	utils.JSONResponse(w, "get profile", info)
+	response.Success(w, http.StatusOK, "get customer profile successfully", info)
 
 }
 
@@ -46,7 +46,7 @@ func (h *consumerHandler) CompleteConsumerInfo(w http.ResponseWriter, r *http.Re
 	err := json.NewDecoder(r.Body).Decode(&payload)
 	if err != nil {
 		log.Println(err.Error())
-		http.Error(w, "bad request", http.StatusBadRequest)
+		response.Error(w, http.StatusBadRequest, "failed to decode json", err)
 		return
 	}
 
@@ -54,14 +54,14 @@ func (h *consumerHandler) CompleteConsumerInfo(w http.ResponseWriter, r *http.Re
 	if err != nil {
 		log.Println(err.Error())
 		if errors.Is(err, mysql.ErrDuplicateNik) {
-			http.Error(w, err.Error(), http.StatusConflict)
+			response.Error(w, http.StatusConflict, "nik already used", err)
 			return
 		}
-		http.Error(w, "internal server error", http.StatusInternalServerError)
+		response.Error(w, http.StatusInternalServerError, "internal server error", err)
 		return
 	}
 
-	utils.JSONResponse(w, "profile has been updated", nil)
+	response.Success(w, http.StatusOK, "profile has been updated", nil)
 
 }
 func (h *consumerHandler) UploadKtp(w http.ResponseWriter, r *http.Request) {
@@ -70,20 +70,20 @@ func (h *consumerHandler) UploadKtp(w http.ResponseWriter, r *http.Request) {
 
 	err := r.ParseMultipartForm(10 << 20)
 	if err != nil {
-		http.Error(w, "file too large", http.StatusBadRequest)
+		response.Error(w, http.StatusBadRequest, "file size exceeded", err)
 		return
 	}
 
 	file, _, err := r.FormFile("image")
 	if err != nil {
-		http.Error(w, "error retrieving the file", http.StatusBadRequest)
+		response.Error(w, http.StatusBadRequest, "error retrieving the file", err)
 		return
 	}
 	defer file.Close()
 
 	result, err := h.c.Upload.Upload(r.Context(), file, uploader.UploadParams{})
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		response.Error(w, http.StatusInternalServerError, "failed to upload ktp", err)
 		return
 	}
 
@@ -108,11 +108,12 @@ func (h *consumerHandler) UploadKtp(w http.ResponseWriter, r *http.Request) {
 	err = h.uc.SetKtp(r.Context(), claims.ConsumerId, result.URL)
 	if err != nil {
 		log.Println(err.Error())
-		http.Error(w, "internal server error", http.StatusInternalServerError)
+		response.Error(w, http.StatusInternalServerError, "failed to set ktp", err)
 		return
 	}
 
-	utils.JSONResponse(w, "KTP has been uploaded", nil)
+	response.Success(w, http.StatusOK, "ktp has been updated successfully", nil)
+
 }
 func (h *consumerHandler) UploadSelfie(w http.ResponseWriter, r *http.Request) {
 
@@ -120,20 +121,20 @@ func (h *consumerHandler) UploadSelfie(w http.ResponseWriter, r *http.Request) {
 
 	err := r.ParseMultipartForm(10 << 20)
 	if err != nil {
-		http.Error(w, "file too large", http.StatusBadRequest)
+		response.Error(w, http.StatusBadRequest, "file size exceeded", err)
 		return
 	}
 
 	file, _, err := r.FormFile("image")
 	if err != nil {
-		http.Error(w, "error retrieving the file", http.StatusBadRequest)
+		response.Error(w, http.StatusBadRequest, "error retrieving the file", err)
 		return
 	}
 	defer file.Close()
 
 	result, err := h.c.Upload.Upload(r.Context(), file, uploader.UploadParams{})
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		response.Error(w, http.StatusInternalServerError, "failed to upload ktp", err)
 		return
 	}
 
@@ -158,11 +159,11 @@ func (h *consumerHandler) UploadSelfie(w http.ResponseWriter, r *http.Request) {
 	err = h.uc.SetSelfie(r.Context(), claims.ConsumerId, result.URL)
 	if err != nil {
 		log.Println(err.Error())
-		http.Error(w, "internal server error", http.StatusInternalServerError)
+		response.Error(w, http.StatusInternalServerError, "failed to set selfie", err)
 		return
 	}
 
-	utils.JSONResponse(w, "Selfie has been uploaded", nil)
+	response.Success(w, http.StatusOK, "selfie has been updated successfully", nil)
 
 }
 
@@ -175,11 +176,11 @@ func (h *consumerHandler) VerifyConsumer(w http.ResponseWriter, r *http.Request)
 	err := h.uc.Verify(r.Context(), consumerID)
 	if err != nil {
 		log.Println(err.Error())
-		http.Error(w, "bad request", http.StatusBadRequest)
+		response.Error(w, http.StatusBadRequest, "failed to verify consumer", err)
 		return
 	}
 
-	fmt.Fprintf(w, "consumer is verifed successfully")
+	response.Success(w, http.StatusOK, "consumer has been verified successfully", nil)
 
 }
 
