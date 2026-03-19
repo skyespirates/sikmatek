@@ -2,15 +2,14 @@ package handler
 
 import (
 	"errors"
-	"fmt"
 	"log"
 	"net/http"
 	"strconv"
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/skyespirates/sikmatek/internal/entity"
+	"github.com/skyespirates/sikmatek/internal/response"
 	"github.com/skyespirates/sikmatek/internal/usecase"
-	"github.com/skyespirates/sikmatek/internal/utils"
 )
 
 type installmentHandler struct {
@@ -29,12 +28,11 @@ func (h *installmentHandler) GenerateInstallment(w http.ResponseWriter, r *http.
 
 	err := h.uc.GenerateInstallment(r.Context(), nomor_kontrak)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		response.Error(w, http.StatusInternalServerError, "failed to generate installment", err)
 		return
 	}
 
-	fmt.Fprint(w, "installment has generated successfully")
-	w.WriteHeader(http.StatusCreated)
+	response.Success(w, http.StatusOK, "installment has generated successfully", nil)
 }
 
 func (h installmentHandler) PayInstallment(w http.ResponseWriter, r *http.Request) {
@@ -43,22 +41,21 @@ func (h installmentHandler) PayInstallment(w http.ResponseWriter, r *http.Reques
 	rawId := ps.ByName("id")
 	id, err := strconv.Atoi(rawId)
 	if err != nil {
-		http.Error(w, "id must be a number", http.StatusBadRequest)
+		response.Error(w, http.StatusBadRequest, "id must be a number", err)
 		return
 	}
 
 	err = h.uc.PayInstallment(r.Context(), id)
 	if err != nil {
 		if errors.Is(err, entity.ErrDuplicatePayment) {
-			http.Error(w, err.Error(), http.StatusBadRequest)
+			response.Error(w, http.StatusConflict, "conflict duplicate", err)
 			return
 		}
-		msg := fmt.Sprintf("internal server error: %s", err.Error())
-		http.Error(w, msg, http.StatusInternalServerError)
+		response.Error(w, http.StatusInternalServerError, "failed to pay installment", err)
 		return
 	}
 
-	utils.JSONResponse(w, "cicilan berhasil dibayar", struct{}{})
+	response.Success(w, http.StatusOK, "installment has payed successfully", nil)
 
 }
 
@@ -71,12 +68,12 @@ func (h installmentHandler) ListInstallment(w http.ResponseWriter, r *http.Reque
 	installements, err := h.uc.ListInstallment(r.Context(), nomor_kontrak)
 	if err != nil {
 		log.Println(err.Error())
-		http.Error(w, "internal server error", http.StatusInternalServerError)
+		response.Error(w, http.StatusInternalServerError, "failed to get installment list", err)
 		return
 	}
 
 	res := map[string]any{"installments": installements}
 
-	utils.JSONResponse(w, "list intallments", res)
+	response.Success(w, http.StatusOK, "get installment list", res)
 
 }
