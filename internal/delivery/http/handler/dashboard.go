@@ -1,9 +1,9 @@
 package handler
 
 import (
-	"encoding/json"
 	"net/http"
 
+	"github.com/skyespirates/sikmatek/internal/response"
 	"github.com/skyespirates/sikmatek/internal/usecase"
 )
 
@@ -20,13 +20,9 @@ func NewDashboardHandler(uc usecase.DashboardUsecase) *dashboardHandler {
 func (h *dashboardHandler) GetConsumerDashboard(w http.ResponseWriter, r *http.Request) {
 	data, err := h.uc.GetConsumerDashboardData(r.Context())
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		response.Error(w, http.StatusInternalServerError, "failed to get dashboard data", err)
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-
-	if err := json.NewEncoder(w).Encode(data); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
+	response.Success(w, http.StatusOK, "get dashboard data successfully", data)
 }
