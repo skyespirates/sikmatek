@@ -84,6 +84,15 @@ func (h *limitHandler) Pengajuan(w http.ResponseWriter, r *http.Request) {
 
 }
 
+// @Summary Approve limit
+// @Description returns message approve status
+// @Tags limit
+// @Accept json
+// @Produce json
+// @Param data body Request true "Approve Limit"
+// @Success 201 {object} response.Response
+// @Router /limits/pengajuan-limit/:limit_id/approve [patch]
+// @Security BearerAuth
 func (h *limitHandler) Approve(w http.ResponseWriter, r *http.Request) {
 
 	var payload entity.UpdateLimitPayload
@@ -111,6 +120,15 @@ func (h *limitHandler) Approve(w http.ResponseWriter, r *http.Request) {
 
 }
 
+// @Summary Reject limit
+// @Description returns message reject status
+// @Tags limit
+// @Accept json
+// @Produce json
+// @Param data body Request true "Reject Limit"
+// @Success 201 {object} response.Response
+// @Router /limits [patch]
+// @Security BearerAuth
 func (h *limitHandler) Reject(w http.ResponseWriter, r *http.Request) {
 
 	var payload entity.UpdateLimitPayload
