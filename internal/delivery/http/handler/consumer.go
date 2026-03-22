@@ -28,6 +28,15 @@ func NewConsumerHandler(uc usecase.ConsumerUsecase, c *cloudinary.Cloudinary) *c
 	}
 }
 
+// @Summary Get Consumer Info
+// @Description returns consumer information
+// @Tags consumer
+// @Accept json
+// @Produce json
+// @Param data body Request true "Consumer Info"
+// @Success 200 {object} response.Response
+// @Router /limits [get]
+// @Security BearerAuth
 func (h *consumerHandler) GetConsumerInfo(w http.ResponseWriter, r *http.Request) {
 
 	info, err := h.uc.GetInfo(r.Context())
@@ -40,6 +49,15 @@ func (h *consumerHandler) GetConsumerInfo(w http.ResponseWriter, r *http.Request
 
 }
 
+// @Summary Post Consumer Info
+// @Description returns status message
+// @Tags consumer
+// @Accept json
+// @Produce json
+// @Param data body entity.UpdateConsumerPayload true "Consumer Info"
+// @Success 200 {object} response.Response
+// @Router /limits [post]
+// @Security BearerAuth
 func (h *consumerHandler) CompleteConsumerInfo(w http.ResponseWriter, r *http.Request) {
 	var payload entity.UpdateConsumerPayload
 
